@@ -2,7 +2,7 @@ from ctypes import *
 import time
 
 
-#Type redefine
+#Type redefine!
 BOOL = c_int
 DWORD = c_ulong
 HANDLE = c_void_p
@@ -11,20 +11,111 @@ CHAR = c_char_p
 USHORT = c_ushort
 LONG = c_long
 INT = c_int
-TRANS_EFFICIENT = float(2*16)/(529*60)
+
+"""
+#####################################################################################################################################################################################
+#Open Device
+#OpenDevice = self.rotationMotor.VCS_OpenDevice
+#OpenDevice.argtypes = [CHAR, CHAR, CHAR, CHAR, POINTER(UINT)]
+#OpenDevice.restype = HANDLE
+
+#Communication Info
+GetProtocolStackSettings = self.rotationMotor.VCS_GetProtocolStackSettings
+GetProtocolStackSettings.argtypes = [HANDLE, POINTER(UINT), POINTER(UINT), POINTER(UINT)]
+GetProtocolStackSettings.restype = BOOL
+
+SetProtocolStackSettings = self.rotationMotor.VCS_SetProtocolStackSettings
+SetProtocolStackSettings.argtypes = [HANDLE, UINT, UINT, POINTER(UINT)]
+SetProtocolStackSettings.restype = BOOL
+
+#Enable Motor
+SetEnableState = self.rotationMotor.VCS_SetEnableState
+SetEnableState.argtypes = [HANDLE, USHORT, POINTER(UINT)]
+SetEnableState.restype = BOOL
+
+GetEnableState = self.rotationMotor.VCS_GetEnableState
+GetEnableState.argtypes = [HANDLE, USHORT, POINTER(BOOL), POINTER(UINT)]
+GetEnableState.restype = BOOL
+
+#Clear Fault
+GetFaultState = self.rotationMotor.VCS_GetFaultState
+GetFaultState.argtypes = [HANDLE, USHORT, POINTER(BOOL), POINTER(UINT)]
+GetFaultState.restype = BOOL
+
+ClearFault = self.rotationMotor.VCS_ClearFault
+ClearFault.argtypes = [HANDLE, USHORT, POINTER(UINT)]
+ClearFault.restype = BOOL
+
+#Velocity Mode
+MoveWithVelocity = self.rotationMotor.VCS_MoveWithVelocity
+MoveWithVelocity.argtypes = [HANDLE, USHORT, LONG, POINTER(UINT)]
+MoveWithVelocity.restype = BOOL
+
+ActivateProfileVelocityMode = self.rotationMotor.VCS_ActivateProfileVelocityMode
+ActivateProfileVelocityMode.argtypes = [HANDLE, USHORT, POINTER(UINT)]
+ActivateProfileVelocityMode.restype = BOOL
+
+HaltVelocityMovement = self.rotationMotor.VCS_HaltVelocityMovement
+HaltVelocityMovement.argtypes = [HANDLE, USHORT, POINTER(UINT)]
+HaltVelocityMovement.restype = BOOL
+
+#Position Mode
+ActivateProfilePositionMode = self.rotationMotor.VCS_ActivateProfilePositionMode
+ActivateProfilePositionMode.argtypes = [HANDLE, USHORT, POINTER(UINT)]
+ActivateProfilePositionMode.restype = BOOL
+
+SetPositionProfile = self.rotationMotor.VCS_SetPositionProfile
+SetPositionProfile.argtypes = [HANDLE, USHORT, UINT, UINT, UINT, POINTER(UINT)]
+SetPositionProfile.restype = BOOL
+
+MoveToPosition = self.rotationMotor.VCS_MoveToPosition
+MoveToPosition.argtypes = [HANDLE, USHORT, LONG, INT, INT, POINTER(UINT)]
+MoveToPosition.restype = BOOL
+
+HaltPositionMovement = self.rotationMotor.VCS_HaltPositionMovement
+HaltPositionMovement.argtypes = [HANDLE, USHORT, POINTER(UINT)]
+HaltPositionMovement.restype = BOOL
+
+#Max Speed
+SetMaxProfileVelocity = self.rotationMotor.VCS_SetMaxProfileVelocity
+SetMaxProfileVelocity.argtypes = [HANDLE, USHORT, UINT, POINTER(UINT)]
+SetMaxProfileVelocity.restype = BOOL
+
+#Motor Speed and Position Info
+GetPosition = self.rotationMotor.VCS_GetPositionIs
+GetPosition.argtypes = [HANDLE, USHORT, POINTER(INT), POINTER(UINT)]
+GetPosition.restype = BOOL
+
+GetVelocity = self.rotationMotor.VCS_GetVelocityIs
+GetVelocity.argtypes = [HANDLE, USHORT, POINTER(INT), POINTER(UINT)]
+GetVelocity.restype = BOOL
+
+#Close Device
+CloseDevice = self.rotationMotor.VCS_CloseDevice
+CloseDevice.argtypes = [HANDLE, POINTER(UINT)]
+CloseDevice.restype = BOOL
+
+#Close All Device
+CloseAllDevices = self.rotationMotor.VCS_CloseAllDevices
+CloseAllDevices.argtypes = [POINTER(UINT)]
+CloseAllDevices.restype = BOOL
+"""
 
 
+#####################################################################################################################################################################################
+#Rotation Motor Class
 class MaxonMotor(object):
 
-    #BOOL = c_int
-    #DWORD = c_ulong
-    #HANDLE = c_void_p
-    #UINT = c_uint
-    #CHAR = c_char_p
-    #USHORT = c_ushort
-    #LONG = c_long
-    #INT = c_int
+    BOOL = c_int
+    DWORD = c_ulong
+    HANDLE = c_void_p
+    UINT = c_uint
+    CHAR = c_char_p
+    USHORT = c_ushort
+    LONG = c_long
+    INT = c_int
     
+    """rotation motor"""
     def __init__(self, RMNodeId, pDeviceName, pProtocolStackName, pInterfaceName, pPortName, lBaudrate):
         #Type redefine!
         
@@ -120,8 +211,6 @@ class MaxonMotor(object):
         self.GetVelocity.argtypes = [HANDLE, USHORT, POINTER(INT), POINTER(UINT)]
         self.GetVelocity.restype = BOOL
 
-	# TO Do halt	
-
         #Close Device
         self.CloseDevice = self.rotationMotor.VCS_CloseDevice
         self.CloseDevice.argtypes = [HANDLE, POINTER(UINT)]
@@ -133,31 +222,8 @@ class MaxonMotor(object):
         self.CloseAllDevices.restype = BOOL
             
         self.open_device()
-       
-    def print_usage(self):
-        print "Usage: Maxon EPOS MVision Dev"
-        print "node id (default 1)"
-        print "device name (EPOS2, EPOS4, default - EPOS4)"
-        print "protocol stack name (MAXON_RS232, CANopen, MAXON SERIAL V2, default - MAXON SERIAL v2)"
-        print "interface name(RS232, USB, CAN_ixx_usb 0, CAN_kvaser_usb 0, ... default - USB)"
-        print "port name (COM1, USB0, CAN0, ... default -USB0)"
-        print "baudrate (115200, 1000000, ... default - 1000000)"
-        print "list available interface (valid device name and protocol stack required)"
-        print "list suppoerted protocol(valid device name required)"
-        print "display device version"
-
-    def print_setting(self):
-        print "default setting"
-        print "node id              =",self.RMNodeId
-        print "device name          =",self.pDeviceName
-        print "protocol stack name  =",self.pProtocolStackName
-        print "interface name       =",self.pInterfaceName
-        print "port name            =",self.pPortName
-        print "baudrate             =",self.lBaudrate
-    
-    #def set_default_parameters(self):
         
-
+    
     #Open Device
     def open_device(self):
         Result = 0
@@ -197,12 +263,14 @@ class MaxonMotor(object):
 ##                if self.SetEnableState(self.RMHandle, self.RMNodeId, byref(self.errorCode)) == BOOL(0):
 ##                    Result = 0
 
-        return Result       
+        
+        return Result
+        
 
     #Max Speed
     def max_speed(self):
         Result = 0
-        if self.SetMaxProfileVelocity(self.RMHandle, self.RMNodeId, UINT(2000), byref(self.errorCode)) != BOOL(0):
+        if self.SetMaxProfileVelocity(self.RMHandle, self.RMNodeId, UINT(90), byref(self.errorCode)) != BOOL(0):
             Result = 1
         return Result
 
@@ -268,7 +336,7 @@ class MaxonMotor(object):
             #if self.SetPositionProfile(self.RMHandle, self.RMNodeId, positionModeSpeed, positionModeAcceleration, positionModeDeceleration, byref(self.errorCode)) != 0:
                 #print self.SetPositionProfile(self.RMHandle, self.RMNodeId, positionModeSpeed, positionModeAcceleration, positionModeDeceleration, byref(self.errorCode))
                 #Result = 0
-		#print self.MoveToPosition(self.RMHandle, self.RMNodeId, LONG(targetRelativePosition), INT(0), INT(1), byref(self.errorCode)2
+		#print self.MoveToPosition(self.RMHandle, self.RMNodeId, LONG(targetRelativePosition), INT(0), INT(1), byref(self.errorCode))
                 #time.sleep(3)
                 #if self.MoveToPosition(self.RMHandle, self.RMNodeId, LONG(targetRelativePosition), INT(0), INT(1), byref(self.errorCode)) == 0:
                     #Result = 0
@@ -277,17 +345,8 @@ class MaxonMotor(object):
 ##################################################################################################################################################################################
 
 #test maxon motor to move on position mode
-#guidewireRotateMotor = MaxonMotor(1, "EPOS2", "MAXON SERIAL V2", "USB", "USB1", 1000000)
-#guidewireRotateMotor.rm_move_to_position(400,8000*50)
-#time.sleep(60)
-#guidewireRotateMotor.rm_halt_position_mode()
-
-
-
-#guidewireRotateMotor2 = MaxonMotor(2, "EPOS2", "MAXON SERIAL V2", "USB", "USB0", 1000000)
-#guidewireRotateMotor2.rm_move_to_position(200*10, -8000*40)
-#guidewireRotateMotor2.rm_move(-int(1/TRANS_EFFICIENT));
-#time.sleep(4)
-#guidewireRotateMotor2.rm_move(0);
+#guidewireRotateMotor = MaxonMotor(2, "EPOS2", "MAXON SERIAL V2", "USB", "USB0", 1000000)
+#guidewireRotateMotor.rm_move_to_position(40,-8000)
+#time.sleep(6)
 #guidewireRotateMotor.close_device()
-#guidewireRotateMotor2.close_device()
+

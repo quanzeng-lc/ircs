@@ -18,8 +18,6 @@ class RCPClient:
         self.connection = None
 	self.output_queue_manager = _outputQueueManager 
 	self.output_queue = OutputQueue()
-
-        #add output sequence
 	self.output_queue_manager.add_rcp_output_queue(self.output_queue)
         self.rtTask = threading.Thread(None, self.execute_rt_task)
         self.msg_list = list()
@@ -33,13 +31,13 @@ class RCPClient:
     def get_addr(self):
         return self.addr
 
-    #transport message to server
     def msg_producer(self):
 	if self.output_queue_manager.get_length()>0:
 	   if self.output_queue_manager.get_data_array_count_from_output_queue(0)>0:
 	        msg = self.output_queue_manager.get_data_array_from_output_queue(0)
-              	#print 'force feedback:'
-		self.connection.sendall(self.generate_msg(int(msg)))
+              	#print 'ultra sound:', msg
+	        # self.msg_list.append(self.generate_msg(int(msg)))
+		self.connection.sendall(msg.encode())
 	      
         #time.sleep(0.1)
 
@@ -90,7 +88,7 @@ class RCPClient:
         dlc = 6  # 2
 
         # body
-        ip = [192,168,137,22]  # 4 192.168.137.22
+        ip = [192, 168, 1, 156]  # 4
         port = 10704  # 2
 
         timestamps_msb = timestamps / (2 ** 16)
@@ -115,9 +113,8 @@ class RCPClient:
         self.connection = socket.socket()
         self.connection.connect((addr, port))
         #time.sleep(1)
-	#for i in range(3):
-        self.send_handshake_message()
-
+	for i in range(3):
+            self.send_handshake_message()
 
     def launch_trasmission_task(self):
         print "connected... start real time communication task"

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-#import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 import time
 import threading
 import random

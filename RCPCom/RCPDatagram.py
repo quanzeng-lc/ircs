@@ -1,5 +1,5 @@
 class RCPDatagram:
-    def __init__(self):
+    def __init__(self, msg):
         # header 10 byte
         self.data_type = 0  # 2
         self.origin_id = 0  # 1
@@ -10,7 +10,7 @@ class RCPDatagram:
         # body
         self.body = ''
 
-#        self.decode(msg)
+        self.decode(msg)
         
     def get_data_type(self):
         return self.data_type
@@ -47,7 +47,6 @@ class RCPDatagram:
 
     def set_itc_datagram_body(self, body):
         self.body = body
-
 
     def decode(self, byte_array):
         self.data_type = ord(byte_array[0]) + ord(byte_array[1])*256  # 2

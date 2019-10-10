@@ -21,7 +21,7 @@ class TcpServer:
     def create_server(self):
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.bind(('0.0.0.0', self.port))
-        self.server_socket.listen(10)
+        self.server_socket.listen(0)
         self.listeningTask.start()
 
     def terminate_server(self):

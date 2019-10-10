@@ -29,10 +29,9 @@ class RCPContext:
         self.contrastMediaPushInstructionSequence = []
 	self.injectionCommandSequence = []
         self.retractInstructionSequence = []
-
-        #force feedback 
+   
         self.forcefeedbackSequence = []
-
+        
 	# system control
 	self.closeSessionSequence = []
 
@@ -40,7 +39,81 @@ class RCPContext:
         # system status variable 
         # ---------------------------------------------------------------------------------------------
 	self.systemStatus = True
-    
+        
+        # ------------------------------------------------------------------------------------------------------------
+        # control variables:
+        #
+        # guidewireControlState
+        #  where 
+        #      0: uncontrolled,
+        #      1: valid, 
+        #      2: nonvalid_prepare_for_push, 
+        #      3: nonvalid_prepare_for_drawn,
+        #      4: exception
+        #
+        # catheterControlState
+        #   where
+        #      0: uncontrolled,
+        #      1: valid
+        #      2: nonvalid_beyond_guidewire
+        #      3: exception
+        # contrastMediaControlState
+        #   where
+        #      0: uncontrolled,
+        #      1: valid
+        #      2: exception
+
+        self.guidewireControlState = 0
+        self.catheterControlState = 0
+        self.contrastMediaControlState = 0
+
+        self.globalGuidewireDistance = 0
+        self.globalGuidewireAngle = 0
+        self.globalCatheterDistance = 0
+        self.globalContrastMediaVolumn = 0
+
+    def get_guidewire_control_state(self):
+        return self.guidewireControlState
+
+    def set_guidewire_control_state(self, guidewire_state):
+        self.guidewireControlState = guidewire_state
+
+    def get_catheter_control_state(self):
+        return self.catheterControlState
+
+    def set_catheter_control_state(self, catheter_state):
+        self.catheterControlState = catheter_state
+
+    def get_contrast_media_control_state(self):
+        return self.contrastMediaControlstate
+
+    def set_contrast_media_control_state(self, contrast_media_control_state):
+        self.contrastMediaControlState = contrast_media_control_state
+
+    def get_global_guidewire_distance(self):
+        return self.globalGuidewireDistance
+
+    def set_global_guidewire_distance(self, guidewire_diatance):
+        self.globalGuidewireDiatnce = guidewire_distance
+
+    def get_global_guidewire_angle(self):
+        return self.globalGuidewireAngle
+
+    def set_global_guidewire_angle(self, guidewire_angle):
+        self.globalGuidewireAngle = guidewire_distance
+
+    def get_global_catheter_distance(self):
+        return self.globalCatheterdistance
+
+    def set_global_cather_distance(self, catheter_distance):
+        self.globalGuidewireDistance = catheter_distance
+
+    def get_global_contrastmedia_volumn(self):
+        return self.globalContrastMediaVolumn
+
+    def set_global_contrastmedia_volumn(self, contrast_media_volumn):
+        self.contrast_media_volumn = contrast_media_volumn
+
     def append_close_session_msg(self, close_session_msg):
 	self.closeSessionSequence.append(close_session_msg)
     
@@ -214,22 +287,21 @@ class RCPContext:
         self.inputLock.release()
         return length
 
-    # get forfeedback
+    # get forcefeedbqck
     def append_latest_forcefeedback_message(self, msg):
-        self.outputLock.acquire()
+        self.outputLock.aquire()
         self.forcefeedbackSequence.append(msg)
         self.outputLock.release()
 
     def fetch_latest_feedback_msg(self):
-        self.outputLock.acquire()
+        self.outputLock.aquire()
         length = len(self.forcefeedbackSequence)
-        ret = self.forcefeedbackSequence.pop(length-1)
+        ret = self.forcefeedbackSequence.pop(length - 1)
         self.outputLock.release()
         return ret
 
     def get_feedback_sequence_length(self):
-        self.outputLock.acquire()
+        self.outputLock.aquire()
         length = len(self.forcefeedbackSequence)
         self.outputLock.release()
         return length
-

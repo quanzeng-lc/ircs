@@ -24,4 +24,4 @@ class RCPDecodingTask:
                         ret = self.inputQueueManager.get_data_array_from_input_queue(cpt)
                         self.datagramAnalyser.analyse(cpt, ret)
 
-            time.sleep(0.02)
+            time.sleep(0.03)

@@ -37,7 +37,7 @@ class RCPClient:
 	        msg = self.output_queue_manager.get_data_array_from_output_queue(0)
               	#print 'ultra sound:', msg
 	        # self.msg_list.append(self.generate_msg(int(msg)))
-		self.connection.sendall(msg.encode())
+                self.connection.sendall(msg.encode())
 	      
         #time.sleep(0.1)
 
@@ -131,7 +131,7 @@ class RCPClient:
 
     def execute_rt_task(self):
         while self.launching:
-            #print "executer"
+            print "executer"
             self.msg_producer()
             # self.task()
             time.sleep(0.1)

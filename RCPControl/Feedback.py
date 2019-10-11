@@ -19,16 +19,21 @@ class Feedback(object):
         self.bytesize = bytesize
         self.parity = parity
         self.stopbits = stopbits
-
+        #logger = modbus_tk.utils.create_logger("console")
+        try:
         # Connect to the slave
 #        master = modbus_rtu.RtuMaster(
 #            serial.Serial(port=PORT, baudrate=9600, bytesize=8, parity='N', stopbits=1, xonxoff=0)
 #        )
-        self.master = modbus_rtu.RtuMaster(
+            self.master = modbus_rtu.RtuMaster(
                 serial.Serial(port=self.PORT, baudrate=self.baudrate, bytesize=self.bytesize, parity=self.parity, stopbits=self.stopbits, xonxoff=0)
                 )
-        self.master.set_timeout(4)
-        self.master.set_verbose(True)
+            self.master.set_timeout(4)
+            self.master.set_verbose(True)
+            #logger.info("connected")
+        except modbus_tk.modbus.ModbusError as exc:
+            #logger.error("%s- Code=%d", exc, exc.get_exception_code())
+            print("error")
 
 
     def aquireForce(self):
@@ -41,7 +46,7 @@ class Feedback(object):
 
 '''
 forcePORT = "/dev/ttyUSB1"
-torquePORT = "/dev/ttyUSB0"
+torquePORT = "/dev/ttyUSB3"
 baudrate = 9600
 bytesize = 8
 parity = 'N'

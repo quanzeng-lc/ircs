@@ -288,20 +288,20 @@ class RCPContext:
         return length
 
     # get forcefeedbqck
-    def append_latest_forcefeedback_message(self, msg):
-        self.outputLock.aquire()
+    def append_latest_forcefeedback_msg(self, msg):
+        self.outputLock.acquire()
         self.forcefeedbackSequence.append(msg)
         self.outputLock.release()
 
     def fetch_latest_feedback_msg(self):
-        self.outputLock.aquire()
+        self.outputLock.acquire()
         length = len(self.forcefeedbackSequence)
         ret = self.forcefeedbackSequence.pop(length - 1)
         self.outputLock.release()
         return ret
 
     def get_feedback_sequence_length(self):
-        self.outputLock.aquire()
+        self.outputLock.acquire()
         length = len(self.forcefeedbackSequence)
         self.outputLock.release()
         return length

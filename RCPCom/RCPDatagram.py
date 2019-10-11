@@ -1,5 +1,5 @@
 class RCPDatagram:
-    def __init__(self, msg):
+    def __init__(self, msg = None):
         # header 10 byte
         self.data_type = 0  # 2
         self.origin_id = 0  # 1
@@ -9,9 +9,10 @@ class RCPDatagram:
 
         # body
         self.body = ''
+        if msg is not None:
+            self.decode(msg)
 
-        self.decode(msg)
-        
+
     def get_data_type(self):
         return self.data_type
         
@@ -65,7 +66,9 @@ class RCPDatagram:
               + chr(timestamps_lsb % 256) + chr(timestamps_lsb/256) \
               + chr(timestamps_msb % 256) + chr(timestamps_msb/256) \
               + chr(self.dlc % 256) + chr(self.dlc/256)
+        msg += self.body
         msg_len = len(msg)
+
         for x in range(msg_len, 1024):
-            msg[x] = self.body[x - msg_len]
+            msg += ' '
         return msg

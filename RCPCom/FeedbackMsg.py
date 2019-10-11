@@ -14,7 +14,7 @@ class FeedbackMsg:
         self.force_type = force_type
 
     def get_force_direction(self):
-        return self.forcedirection
+        return self.force_direction
 
     def set_force_direction(self, force_direction):
         self.force_direction = force_direction

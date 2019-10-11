@@ -11,7 +11,8 @@ from MaxonMotor import MaxonMotor
 from InfraredReflectiveSensor import InfraredReflectiveSensor
 from EmergencySwitch import EmergencySwitch
 from Feedback import Feedback
-FORCEFEEDBACK = 15
+from RCPCom.FeedbackMsg import FeedbackMsg
+FORCEFEEDBACK = 6
 
 class Dispatcher(object):
     """
@@ -52,7 +53,7 @@ class Dispatcher(object):
         # feedback
         # ---------------------------
         self.forcefeedback = Feedback("/dev/ttyUSB1", 9600, 8, 'N', 1)
-
+        self.torquefeedback = Feedback("/dev/ttyUSB0", 9600, 8, 'N', 1)
         # ---------------------------------------------------------------------------------------------
         # EmergencySwitch
         # ---------------------------------------------------------------------------------------------
@@ -539,21 +540,36 @@ class Dispatcher(object):
         self.number_of_cycles = input("please input the number of cycles")
 	
     def aquirefeedback_context(self):
-        forcevalue = self.forcefeedback.aquireForce()
-        forcetype = FORCEFEEDBACK
-        forcedirection = 0
-        if forcevalue < 0:
-            forcedirection = 1
-        else:
+        while True:
+            forcevalue = self.forcefeedback.aquireForce()
+            forcetype = 0
             forcedirection = 0
-        forcevalue = abs(forcevalue)
-        feedbackMsg = FeedbackMsg()
-        feedbackMsg.set_force_type(forcetype)
-        feedbackMsg.set_force_direction(forcedirection)
-        feedbackMsg.set_force_value(forcevalue)
+            if forcevalue < 0:
+                forcedirection = 1
+            else:
+                forcedirection = 0
+            forcevalue = abs(forcevalue)
+            feedbackMsg = FeedbackMsg()
+            feedbackMsg.set_force_type(forcetype)
+            feedbackMsg.set_force_direction(forcedirection)
+            feedbackMsg.set_force_value(forcevalue)
+            self.context.append_latest_forcefeedback_msg(feedbackMsg)
 
-        self.context.append_latest_forcefeedback_mesage(feedbackMsg)
-        
+            torquevalue = self.torquefeedback.aquireForce()
+            torquetype = 1
+            torquedirection = 0
+            if torquevalue < 0:
+                torquedirection = 1
+            else:
+                torquedirection = 0
+            torquevalue = abs(torquevalue)
+            torquefeedbackMsg = FeedbackMsg()
+            torquefeedbackMsg.set_force_type(torquetype)
+            torquefeedbackMsg.set_force_direction(torquedirection)
+            torquefeedbackMsg.set_force_value(torquevalue)
+            self.context.append_latest_forcefeedback_msg(torquefeedbackMsg)
+            print("data", forcevalue, torquevalue)
+
 
 # test push guidewire automatically for several times"
 """

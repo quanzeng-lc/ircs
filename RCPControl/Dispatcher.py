@@ -541,33 +541,29 @@ class Dispatcher(object):
 	
     def aquirefeedback_context(self):
         while True:
+            feedbackMsg = FeedbackMsg()
             forcevalue = self.forcefeedback.aquireForce()
-            forcetype = 0
+            torquevalue = self.torquefeedback.aquireForce()
+            
             forcedirection = 0
             if forcevalue < 0:
                 forcedirection = 1
             else:
                 forcedirection = 0
             forcevalue = abs(forcevalue)
-            feedbackMsg = FeedbackMsg()
-            feedbackMsg.set_force_type(forcetype)
-            feedbackMsg.set_force_direction(forcedirection)
-            feedbackMsg.set_force_value(forcevalue)
-            self.context.append_latest_forcefeedback_msg(feedbackMsg)
-
-            torquevalue = self.torquefeedback.aquireForce()
-            torquetype = 1
+            
             torquedirection = 0
             if torquevalue < 0:
                 torquedirection = 1
             else:
                 torquedirection = 0
             torquevalue = abs(torquevalue)
-            torquefeedbackMsg = FeedbackMsg()
-            torquefeedbackMsg.set_force_type(torquetype)
-            torquefeedbackMsg.set_force_direction(torquedirection)
-            torquefeedbackMsg.set_force_value(torquevalue)
-            self.context.append_latest_forcefeedback_msg(torquefeedbackMsg)
+            
+            feedbackMsg.set_force_direction(forcedirection)
+            feedbackMsg.set_force_value(forcevalue)
+            feedbackMsg.set_torque_direction(torquedirection)
+            feedbackMsg.set_torque_value(torquevalue)
+            self.context.append_latest_forcefeedback_msg(feedbackMsg)
             print("data", forcevalue, torquevalue)
 
 

@@ -27,10 +27,11 @@ class RCPEncodingTask:
                     if self.context.get_feedback_sequence_length()>0:
                         msg = self.context.fetch_latest_feedback_msg()
 
-                        forcetype = msg.get_force_type()
-                        direction = msg.get_force_direction()
+                        forcedirection = msg.get_force_direction()
                         forcevalue = msg.get_force_value()
-                        datagram_body = chr(forcetype) + chr(direction) + chr(forcevalue%256) + chr(forcevalue / 256)
+                        torquedirection = msg.get_torque_direction()
+                        torquevalue = msg.get_torque_value()
+                        datagram_body = chr(forcedirection) + chr(forcevalue%256) + chr(forcevalue / 256) + chr(torquedirection) + chr(torquevalue%256) + chr(torquevalue / 256)
                         
                         datagram = RCPDatagram()
                         datagram.set_data_type(6)

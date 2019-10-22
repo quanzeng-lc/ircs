@@ -131,7 +131,7 @@ class RCPClient:
 
     def execute_rt_task(self):
         while self.launching:
-            print "executer"
+        #    print "executer"
             self.msg_producer()
             # self.task()
             time.sleep(0.1)

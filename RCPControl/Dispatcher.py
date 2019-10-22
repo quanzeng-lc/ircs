@@ -236,7 +236,7 @@ class Dispatcher(object):
         """
         the shifboard get back when guidewire progress
 	"""
-        #self.context.clear()
+        self.context.clear_guidewire_message()
         self.draw_back_guidewire_curcuit_flag == False
         
 	#self.gripperFront.gripper_chuck_loosen()
@@ -278,12 +278,14 @@ class Dispatcher(object):
         self.gripperFront.gripper_chuck_loosen()
         self.gripperBack.gripper_chuck_loosen()
         self.draw_back_guidewire_curcuit_flag == True
-	self.needToRetract = False
+	self.context.clear_guidewire_message()
+        self.needToRetract = False
    
     def push_guidewire_advance(self):
         """
         the shiftboard advance with pushing guidewire
 	"""
+        #self.context.clear_guidewire_message()
     	self.guidewireProgressMotor.set_speed(self.speedProgress)
         self.global_state = self.infraredReflectiveSensor.read_current_state()
         while self.global_state !=2:
@@ -564,7 +566,7 @@ class Dispatcher(object):
             feedbackMsg.set_torque_direction(torquedirection)
             feedbackMsg.set_torque_value(torquevalue)
             self.context.append_latest_forcefeedback_msg(feedbackMsg)
-            print("data", forcevalue, torquevalue)
+            #print("data", forcevalue, torquevalue)
 
 
 # test push guidewire automatically for several times"

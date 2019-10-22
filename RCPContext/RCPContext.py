@@ -71,6 +71,9 @@ class RCPContext:
         self.globalGuidewireAngle = 0
         self.globalCatheterDistance = 0
         self.globalContrastMediaVolumn = 0
+    
+    def clear_guidewire_message(self):
+        self.guidewireProgressInstructionSequence = []
 
     def get_guidewire_control_state(self):
         return self.guidewireControlState

@@ -29,9 +29,13 @@ class RCPContext:
         self.contrastMediaPushInstructionSequence = []
 	self.injectionCommandSequence = []
         self.retractInstructionSequence = []
-   
+  
+        # forcefeedback
         self.forcefeedbackSequence = []
         
+        # push catheter and guidewire together
+        self.catheter_guidewire_push_sequence = []
+
 	# system control
 	self.closeSessionSequence = []
 
@@ -308,3 +312,20 @@ class RCPContext:
         length = len(self.forcefeedbackSequence)
         self.outputLock.release()
         return length
+
+
+    # -------------------------------------------------
+    # catheter and guidewire push together
+    # --------------------------------------------------
+    def get_catheter_guidewire_push_sequence_length(self):
+        self.inputLock.acquire()
+        length = len(self.catheter_guidewire_push_sequence)
+        self.inputLock.release()
+        return length
+
+    def get_fetch_latest_catheter_guidewire_push_msg(self):
+        self.inputLock.acquire()
+        length = len(self.catheter_guidewire_push_sequence)
+        ret = self.catheter_guidewire_push_sequence.pop(length - 1)
+        self.input.release()
+        return ret

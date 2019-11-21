@@ -52,8 +52,8 @@ class Dispatcher(object):
         # ---------------------------
         # feedback
         # ---------------------------
-        self.forcefeedback = Feedback("/dev/ttyUSB1", 9600, 8, 'N', 1)
-        self.torquefeedback = Feedback("/dev/ttyUSB0", 9600, 8, 'N', 1)
+        #self.forcefeedback = Feedback("/dev/ttyUSB1", 9600, 8, 'N', 1)
+        #self.torquefeedback = Feedback("/dev/ttyUSB0", 9600, 8, 'N', 1)
         # ---------------------------------------------------------------------------------------------
         # EmergencySwitch
         # ---------------------------------------------------------------------------------------------
@@ -557,8 +557,8 @@ class Dispatcher(object):
     def aquirefeedback_context(self):
         while True:
             feedbackMsg = FeedbackMsg()
-            forcevalue = self.forcefeedback.aquireForce()
-            torquevalue = self.torquefeedback.aquireForce()
+            forcevalue = 1#self.forcefeedback.aquireForce()
+            torquevalue = 1#self.torquefeedback.aquireForce()
             
             forcedirection = 0
             if forcevalue < 0:

@@ -131,13 +131,14 @@ class Dispatcher(object):
         # ------------------------------------------------------------------------------
         # advance according the set distance
         # -----------------------------------------------------------------------------
+        """
         if self.context.get_catheter_guidewire_push_sequence_lenght() > 0:
             msg = self.context.fetch_latest_catheter_guidewire_push_msg()
             if self.draw_back_guidewire_curcuit_flag == False:
                 return 
             speed = msg.get_motor_speed()
             relative_position = msg.get_motor_relative_distance()
-
+        """
 
 	# ---------------------------------------------------------------------------------------------
         # catheter execution case

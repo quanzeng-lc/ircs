@@ -10,8 +10,8 @@ from Gripper import Gripper
 from MaxonMotor import MaxonMotor
 from InfraredReflectiveSensor import InfraredReflectiveSensor
 from EmergencySwitch import EmergencySwitch
-from Feedback import Feedback
 from RCPCom.FeedbackMsg import FeedbackMsg
+from Parameter import Parameter
 FORCEFEEDBACK = 6
 
 class Dispatcher(object):
@@ -52,8 +52,8 @@ class Dispatcher(object):
         # ---------------------------
         # feedback
         # ---------------------------
-        self.forcefeedback = Feedback("/dev/ttyUSB1", 9600, 8, 'N', 1)
-        self.torquefeedback = Feedback("/dev/ttyUSB0", 9600, 8, 'N', 1)
+        self.forceFeedback = Feedback("/dev/ttyUSB1", 9600, 8, 'N', 1)
+        self.torqueFeedback = Feedback("/dev/ttyUSB2", 9600, 8, 'N', 1)
         # ---------------------------------------------------------------------------------------------
         # EmergencySwitch
         # ---------------------------------------------------------------------------------------------
@@ -74,14 +74,21 @@ class Dispatcher(object):
         self.position_cgf = 2
         self.position_cgb = -100
 
+        # -------------------------------------------------------------
+        # record the parameter: feedback guidewireDistance
+        # -------------------------------------------------------------
+        self.hapticParameter = Parameter(self.context, self.forceFeedbackRRR
+
+
+
 	# ---------------------------------------------------------------------------------------------
         # real time task to parse commandes in context
         # ---------------------------------------------------------------------------------------------
        	self.dispatchTask = threading.Thread(None, self.do_parse_commandes_in_context)
        	self.dispatchTask.start()
 
-        self.aquirefeedbackTask = threading.Thread(None, self.aquirefeedback_context)
-        self.aquirefeedbackTask.start()
+#        self.aquirefeedbackTask = threading.Thread(None, self.aquirefeedback_context)
+#        self.aquirefeedbackTask.start()
         
     def set_global_state(self, state):
 	self.global_state = state	
@@ -117,13 +124,24 @@ class Dispatcher(object):
                     self.catheterMotor.enable()
                     self.angioMotor.enable()
                     self.lastSwitch = 0
-                    self.decode()
+                    if self.decision_making() == 1:
+                        self.decode()       
 
                 elif self.emSwitch == 0 and self.lastSwitch == 0:
-                    self.decode()
-                
+                    if self.decision_making() == 1:
+                        self.decode()
+
 	    time.sleep(0.05)
-	    
+
+    def decision_making(self):
+        ret = 1
+        
+        # determine control availability
+        self.context
+
+        return ret
+
+
     def decode(self):
 	"""
         decode messages in the sequence and performe operations
@@ -131,12 +149,14 @@ class Dispatcher(object):
         # ------------------------------------------------------------------------------
         # advance according the set distance
         # -----------------------------------------------------------------------------
+        """
         if self.context.get_catheter_guidewire_push_sequence_lenght() > 0:
             msg = self.context.fetch_latest_catheter_guidewire_push_msg()
             if self.draw_back_guidewire_curcuit_flag == False:
                 return 
             speed = msg.get_motor_speed()
             relative_position = msg.get_motor_relative_distance()
+        """
 
 
 	# ---------------------------------------------------------------------------------------------
@@ -554,10 +574,11 @@ class Dispatcher(object):
         self.number_of_cycles = input("please input the number of cycles")
 	
     def aquirefeedback_context(self):
+        """
         while True:
             feedbackMsg = FeedbackMsg()
-            forcevalue = self.forcefeedback.aquireForce()
-            torquevalue = self.torquefeedback.aquireForce()
+            forcevalue = self.forceFeedback.aquireForce()
+            torquevalue = self.torqueFeedback.aquireForce()
             
             forcedirection = 0
             if forcevalue < 0:
@@ -577,9 +598,9 @@ class Dispatcher(object):
             feedbackMsg.set_force_value(forcevalue)
             feedbackMsg.set_torque_direction(torquedirection)
             feedbackMsg.set_torque_value(torquevalue)
-            self.context.append_latest_forcefeedback_msg(feedbackMsg)
+            self.context.append_latest_forceFeedback_msg(feedbackMsg)
             #print("data", forcevalue, torquevalue)
-
+        """
 
 # test push guidewire automatically for several times"
 """

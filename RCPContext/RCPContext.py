@@ -1,5 +1,6 @@
 #-*- coding: utf-8 -*-
 import threading
+from RCPControl.SensingParameter import SensingParameter
 
 
 class RCPContext:
@@ -38,6 +39,9 @@ class RCPContext:
 
 	# system control
 	self.closeSessionSequence = []
+        
+
+        self.sensingParameterSequence = []
 
 	# ---------------------------------------------------------------------------------------------
         # system status variable 
@@ -75,7 +79,34 @@ class RCPContext:
         self.globalGuidewireAngle = 0
         self.globalCatheterDistance = 0
         self.globalContrastMediaVolumn = 0
-    
+       
+        informationAnalysisTask = threading.Thread(None, core_information_analysis)
+        informationAnalysisTask.start()
+
+        decision_making_task = threading.Thread(None, decision_making)
+        decision_making_task.start()
+
+    def core_information_analysis(self):
+        while(1):
+            parameter = SensingParameter()
+            parameter.setTimestamps(10)
+            parameter.setForceFeedback(10)
+            parameter.setTorqueFeedback(10)
+            parameter.setDistanceFromChuckToCatheter(10)
+            parameter.setTelescopicRodLength(10)
+            parameter.setDistanceFromCatheterToGuidewire(10)
+            parameter.setGuidewireAngle(10)
+            parameter.setTranslationVelocity(10)
+            parameter.setRotationVelocity(10)
+            self.sensingParameterSequence.append(parameter)
+            self.decision_making()
+            time.sleep(30)
+
+    def decision_making(self):
+        ret = 1
+
+        return ret
+
     def clear_guidewire_message(self):
         self.guidewireProgressInstructionSequence = []
 

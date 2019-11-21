@@ -3,7 +3,8 @@ import modbus_tk
 import modbus_tk.defines as cst
 from modbus_tk import modbus_rtu
 import struct
-import thread
+import threading
+from RCPContext.RCPContext import RCPContext
 import time
 import sys
 
@@ -19,12 +20,10 @@ class Feedback(object):
         self.bytesize = bytesize
         self.parity = parity
         self.stopbits = stopbits
+        self.forceFeedback  = 0
+        lockFeedback = thraeding.Lock()
         #logger = modbus_tk.utils.create_logger("console")
         try:
-        # Connect to the slave
-#        master = modbus_rtu.RtuMaster(
-#            serial.Serial(port=PORT, baudrate=9600, bytesize=8, parity='N', stopbits=1, xonxoff=0)
-#        )
             self.master = modbus_rtu.RtuMaster(
                 serial.Serial(port=self.PORT, baudrate=self.baudrate, bytesize=self.bytesize, parity=self.parity, stopbits=self.stopbits, xonxoff=0)
                 )
@@ -34,14 +33,25 @@ class Feedback(object):
         except modbus_tk.modbus.ModbusError as exc:
             #logger.error("%s- Code=%d", exc, exc.get_exception_code())
             print("error")
-
+        self.feedbackTask = threading.Thread(None, self.aquireForce)  
+        self.feedbackTask.start()
 
     def aquireForce(self):
-        output = self.master.execute(1, cst.READ_HOLDING_REGISTERS, 30, 2)
-        bb = struct.unpack('>i', struct.pack('>HH', output[0], output[1]))
-        out = bb[0]
-#        print "output:", out
-        return out          
+        while True:
+            output = self.master.execute(1, cst.READ_HOLDING_REGISTERS, 30, 2)
+            bb = struct.unpack('>i', struct.pack('>HH', output[0], output[1]))
+            out = bb[0]
+    #        print "output:", out
+            lockFeedback.acquire()
+            self.forceFeedback = out
+            lockFeedabck.release()
+            time.sleep(50)
+
+    def obtainForce(self):
+        acquireFeedback.acquire()
+        ret =  self.forceFeedback
+        acquireFeedback.release()
+        return ret
 
 
 '''

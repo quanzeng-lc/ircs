@@ -4,6 +4,7 @@
 import threading
 import time
 import sys
+from enum import Enum
 from RCPContext.RCPContext import RCPContext
 from OrientalMotor import OrientalMotor
 from Gripper import Gripper
@@ -11,8 +12,13 @@ from MaxonMotor import MaxonMotor
 from InfraredReflectiveSensor import InfraredReflectiveSensor
 from EmergencySwitch import EmergencySwitch
 from RCPCom.FeedbackMsg import FeedbackMsg
-from Parameter import Parameter
+from SensingParameter import SensingParameter
+from Feedback import Feedback
 FORCEFEEDBACK = 6
+
+class FeedbackType(Enum):
+    FORCEFEEDBACK = 1
+    TORQUEFEEDBACK = 2
 
 class Dispatcher(object):
     """
@@ -48,12 +54,17 @@ class Dispatcher(object):
         # sensors
         # ---------------------------------------------------------------------------------------------
         self.infraredReflectiveSensor = InfraredReflectiveSensor()
-        
-        # ---------------------------
+        # --------------------------------------------------------------
         # feedback
-        # ---------------------------
-        self.forceFeedback = Feedback("/dev/ttyUSB1", 9600, 8, 'N', 1)
-        self.torqueFeedback = Feedback("/dev/ttyUSB2", 9600, 8, 'N', 1)
+        #
+        # -------------------------------------------------------------
+        self.forceFeedback = Feedback("/dev/ttyUSB0", 9600, 8, 'N', 1, self.context)
+        self.torqueFeedback = Feedback("/dev/ttyUSB1", 9600, 8, 'N', 1, self.context)
+        self.forceFeedback.setID(FeedbackType.FORCEFEEDBACK)
+        self.torqueFeedback.setID(FeedbackType.TORQUEFEEDBACK)
+        self.forceFeedback.start()
+        self.torqueFeedback.start()
+
         # ---------------------------------------------------------------------------------------------
         # EmergencySwitch
         # ---------------------------------------------------------------------------------------------
@@ -74,18 +85,11 @@ class Dispatcher(object):
         self.position_cgf = 2
         self.position_cgb = -100
 
-        # -------------------------------------------------------------
-        # record the parameter: feedback guidewireDistance
-        # -------------------------------------------------------------
-        self.hapticParameter = Parameter(self.context, self.forceFeedbackRRR
-
-
-
-	# ---------------------------------------------------------------------------------------------
+	# -------------------------------------------------------------------------
         # real time task to parse commandes in context
-        # ---------------------------------------------------------------------------------------------
-       	self.dispatchTask = threading.Thread(None, self.do_parse_commandes_in_context)
-       	self.dispatchTask.start()
+        # ---------------------------------------------------------------------------------
+        self.dispatchTask = threading.Thread(None, self.do_parse_commandes_in_context)
+        self.dispatchTask.start()
 
 #        self.aquirefeedbackTask = threading.Thread(None, self.aquirefeedback_context)
 #        self.aquirefeedbackTask.start()
@@ -137,7 +141,7 @@ class Dispatcher(object):
         ret = 1
         
         # determine control availability
-        self.context
+        ret = self.context.getGlobalDecisionMade()
 
         return ret
 

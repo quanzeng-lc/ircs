@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 # encoding: utf-8
 import threading
-from RCPControl.Feedback import Feedback
-from RCPContext.RCPCOntext import RCPContext
-from OrientalMotor import OrientalMotor
+#from RCPControl.Feedback import Feedback
+#from OrientalMotor import OrientalMotor
 
 # --------------------------------------
 # T timestamps

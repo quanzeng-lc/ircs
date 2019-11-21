@@ -4,16 +4,16 @@ import modbus_tk.defines as cst
 from modbus_tk import modbus_rtu
 import struct
 import threading
-from RCPContext.RCPContext import RCPContext
 import time
 import sys
+from RCPContext.RCPContext import RCPContext
 
 # PORT = 1 
 #PORT = "/dev/ttyUSB0"
 
 class Feedback(object):
     
-    def __init__(self, port, baudrate, bytesize, parity, stopbits):
+    def __init__(self, port, baudrate, bytesize, parity, stopbits, context):
         #serial parameter set
         self.PORT = port
         self.baudrate = baudrate
@@ -21,7 +21,9 @@ class Feedback(object):
         self.parity = parity
         self.stopbits = stopbits
         self.forceFeedback  = 0
-        lockFeedback = thraeding.Lock()
+        self.feedbackID = 0
+        self.context = context
+        lockFeedback = threading.Lock()
         #logger = modbus_tk.utils.create_logger("console")
         try:
             self.master = modbus_rtu.RtuMaster(
@@ -34,7 +36,6 @@ class Feedback(object):
             #logger.error("%s- Code=%d", exc, exc.get_exception_code())
             print("error")
         self.feedbackTask = threading.Thread(None, self.aquireForce)  
-        self.feedbackTask.start()
 
     def aquireForce(self):
         while True:
@@ -44,6 +45,11 @@ class Feedback(object):
     #        print "output:", out
             lockFeedback.acquire()
             self.forceFeedback = out
+            if self.feedbackID is FeedbackType.FORCEFEEDBACK:
+                self.context.setGlobalForceFeedback(out)
+            elif self.feedbackID is FeedbackType.TORQUEFEEDBACK:
+                self.context.setGlobalTorqueFeedback(out)
+            self.context.setGlobal
             lockFeedabck.release()
             time.sleep(50)
 
@@ -53,6 +59,11 @@ class Feedback(object):
         acquireFeedback.release()
         return ret
 
+    def setID(self, ID):
+        self.feedbackID = ID
+
+    def start(self):
+        self.feedbackTask.start()
 
 '''
 forcePORT = "/dev/ttyUSB1"

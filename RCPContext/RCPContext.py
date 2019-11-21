@@ -2,7 +2,6 @@
 import threading
 from RCPControl.SensingParameter import SensingParameter
 
-
 class RCPContext:
 
     def __init__(self):
@@ -74,20 +73,26 @@ class RCPContext:
         self.guidewireControlState = 0
         self.catheterControlState = 0
         self.contrastMediaControlState = 0
-
-        self.globalGuidewireDistance = 0
-        self.globalGuidewireAngle = 0
-        self.globalCatheterDistance = 0
         self.globalContrastMediaVolumn = 0
-       
-        informationAnalysisTask = threading.Thread(None, core_information_analysis)
+
+        self.globalForceFeedback = 0.0
+        self.globalTorqueFeedback = 0.0
+        self.globalDistanceFromChuckToCatheter = 0.0
+        self.globalTelescopicRodLength = 0.0
+        self.globalDistanceFromCatheterToGuidewire = 0.0
+        self.globalGuidewireAngle = 0.0
+        self.globalTranslationVelocity = 0.0
+        self.globalRotationVelocity = 0.0
+        self.globalDecisionMade = 1
+
+        informationAnalysisTask = threading.Thread(None, self.core_information_analysis)
         informationAnalysisTask.start()
 
-        decision_making_task = threading.Thread(None, decision_making)
+        decision_making_task = threading.Thread(None, self.decision_making)
         decision_making_task.start()
 
     def core_information_analysis(self):
-        while(1):
+        while True:
             parameter = SensingParameter()
             parameter.setTimestamps(10)
             parameter.setForceFeedback(10)
@@ -103,8 +108,14 @@ class RCPContext:
             time.sleep(30)
 
     def decision_making(self):
-        ret = 1
+        while True:
 
+            self.globalDecisionMade = 1
+
+        #return ret
+
+    def decision_made(self):
+        ret = self.decision_made
         return ret
 
     def clear_guidewire_message(self):
@@ -128,29 +139,57 @@ class RCPContext:
     def set_contrast_media_control_state(self, contrast_media_control_state):
         self.contrastMediaControlState = contrast_media_control_state
 
-    def get_global_guidewire_distance(self):
-        return self.globalGuidewireDistance
+    def getGlobalForceFeedback(self):
+        return self.globalForceFeedback
 
-    def set_global_guidewire_distance(self, guidewire_diatance):
-        self.globalGuidewireDiatnce = guidewire_distance
+    def setGlobalForceFeedback(self, globalForceFeedback):
+        self.globalForceFeedback = globalForceFeedback
 
-    def get_global_guidewire_angle(self):
+    def getGlobalTorqueFeedback(self):
+        return self.globalTorqueFeedback
+
+    def setGlobalTorqueFeedback(self, globalTorqueFeedback):
+        self.globalTorqueFeedback = globalTorqueFeedback
+
+    def getGlobalDistanceFromChuckToCatheter(self):
+        return self.globalDistanceFromChuckToCatheter
+
+    def setGlobalDistanceFromChuckToCatheter(self, globalDistanceFromChuckToCatheter):
+        self.globalDistanceFromChuckToCatheter = globalDistanceFromChuckToCatheter
+
+    def getGlobalTelescopicRodLength(self):
+        return self.globalTelescopicRodLength
+
+    def setGlobalTelescopicRodLength(self, globalTelescopicRodLength):
+        self.globalTelescopicRodLength = globalTelescopicRodLength
+
+    def getGlobalDistanceFromCatheterToGuidewire(self):
+        return self.globalDistanceFromCatheterToGuidewire
+
+    def setGlobalDistanceFromCatheterToGuidewire(self, globalDistanceFromCatheterToGuidewire):
+        self.globalDistanceFromCatheterToGuidewire = globalDistanceFromCatheterToGuidewire
+
+    def getGlobalGuidewireAngle(self):
         return self.globalGuidewireAngle
 
-    def set_global_guidewire_angle(self, guidewire_angle):
-        self.globalGuidewireAngle = guidewire_distance
+    def setGlobalGuidewireAngle(self, globalGuidewireAngle):
+        self.globalGuidewireAngle = globalGuidewireAngle
 
-    def get_global_catheter_distance(self):
-        return self.globalCatheterdistance
+    def getGlobalTranslationVelocity(self):
+        return globalTranslationVelocity
 
-    def set_global_cather_distance(self, catheter_distance):
-        self.globalGuidewireDistance = catheter_distance
+    def setGlobalTranslationVelocity(self, globalTranslationVelocity):
+        self.globalTranslationVelocity = globalTranslationVelocity
 
-    def get_global_contrastmedia_volumn(self):
-        return self.globalContrastMediaVolumn
+    def getGlobalRotationVelocity(self):
+        return self.globalRotationVelocity
 
-    def set_global_contrastmedia_volumn(self, contrast_media_volumn):
-        self.contrast_media_volumn = contrast_media_volumn
+    def setGlobalRotationVelocity(self, globalRotationVelocity):
+        self.globalRotationVelocity = globalRotationVelocity
+
+    def getGlobalDecisionMade(self):
+        ret = self.globalDecisionMade
+        return ret
 
     def append_close_session_msg(self, close_session_msg):
 	self.closeSessionSequence.append(close_session_msg)

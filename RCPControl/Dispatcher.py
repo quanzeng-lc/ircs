@@ -4,7 +4,6 @@
 import threading
 import time
 import sys
-from enum import Enum
 from RCPContext.RCPContext import RCPContext
 from OrientalMotor import OrientalMotor
 from Gripper import Gripper
@@ -16,9 +15,6 @@ from SensingParameter import SensingParameter
 from Feedback import Feedback
 FORCEFEEDBACK = 6
 
-class FeedbackType(Enum):
-    FORCEFEEDBACK = 1
-    TORQUEFEEDBACK = 2
 
 class Dispatcher(object):
     """
@@ -44,7 +40,9 @@ class Dispatcher(object):
 	# execution units of the interventional robot
 	# ---------------------------------------------------------------------------------------------
         self.guidewireProgressMotor = OrientalMotor(20, 21, True)
+        self.guidewireProgressMotor.setParameterTypeID(GlobalParameterType.TRANSLATIONVELOCITY)
         self.guidewireRotateMotor = OrientalMotor(19, 26, True)
+        self.guidewireRotateMotor.setParameterTypeID(GlobalParameterType.ROTATIONVELOCITY)
         self.catheterMotor = OrientalMotor(17, 27, True)
         self.angioMotor = OrientalMotor(23, 24, False)
         self.gripperFront = Gripper(7)

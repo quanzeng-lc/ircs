@@ -4,6 +4,7 @@
 import RPi.GPIO as GPIO
 import time
 import threading
+from RCPContext.RCPContext import RCPContext
 
 
 class OrientalMotor(object):
@@ -18,26 +19,32 @@ class OrientalMotor(object):
         GPIO.setwarnings(False)
         self.flag = True
 	self.pos_flag = True
-        self.speedFlag = 0
+        self.expectedSpeedFlag = 0
         self.count = 0
         self.pushIO = push_io
         self.pullIO = pull_io
+        self.context = None
         GPIO.setup(self.pushIO, GPIO.OUT, initial=GPIO.HIGH)
         GPIO.setup(self.pullIO, GPIO.OUT, initial=GPIO.HIGH)
 
+        #parametertype id
+        self.hapticFeedbackID = 0
 
 	#mode choose
 	self.mode = mode_flag
 
         #velocity mode
-        self.speed = 0
+        self.expectedSpeed = 0
+
+        # actual speed m/s
+        self.actualVelocity = 0
 
         #position mode
         self.pos_motor_flag = 1
 	self.re_vol_pos = 1    # 3.4
         self.position = 0
 	self.re_volsp_possp = 204.0
-        self.pos_speed = 60.0
+        self.pos_expectedSpeed = 60.0
 	
 	self.pos_count = 0
 #	self.all_sleep_time = 0
@@ -51,6 +58,10 @@ class OrientalMotor(object):
 #	    self.moveTask = threading.Thread(None, self.continuous_move_position)
 #            self.moveTask.start()
 
+        # monitoring the motor status
+        self.statusParameterTask = threading.Thread(None, self.statusMonitoring)
+        self.statusParameterTask.start()
+
 
     def open_device(self):
         self.flag = True
@@ -61,17 +72,17 @@ class OrientalMotor(object):
     def close_position_device(self):
 	self.pos_flag = False
 
-    def set_speed(self, speed):
-        if speed > 0:
-            self.speedFlag = 1
-        elif speed < 0:
-            self.speedFlag = 2
-#        self.speed = abs(speed)        
-        elif speed == 0:
-	    self.speedFlag = 0
+    def set_expectedSpeed(self, speed):
+        if expectedSpeed > 0:
+            self.expectedSpeedFlag = 1
+        elif expectedSpeed < 0:
+            self.expectedSpeedFlag = 2
+#        self.expectedSpeed = abs(speed)        
+        elif expectedSpeed == 0:
+	    self.expectedSpeedFlag = 0
 #	    self.flag = False
-#            self.speed = 1
-        self.speed = abs(speed)
+#            self.expectedSpeed = 1
+        self.expectedSpeed = abs(speed)
    
     def standby(self):
         self.mv_enable = False
@@ -82,13 +93,13 @@ class OrientalMotor(object):
     def continuous_move(self):
         while self.flag:            
             if self.mv_enable:
-                if self.speedFlag == 0:
+                if self.expectedSpeedFlag == 0:
 		    time.sleep(0.1)
 
-                if self.speedFlag == 1:
+                if self.expectedSpeedFlag == 1:
                     self.push()
             
-                if self.speedFlag == 2:
+                if self.expectedSpeedFlag == 2:
                     self.pull()
             else:
                 time.sleep(0.5)
@@ -100,11 +111,11 @@ class OrientalMotor(object):
     
     def push(self):
         self.orientalMotorPushLock.acquire()
-#	interval = 0.0005*60/self.speed
-	if self.speed == 0:
+#	interval = 0.0005*60/self.expectedSpeed
+	if self.expectedSpeed == 0:
 	    interval = 0
 	else:
-            interval = 0.0005*60/self.speed
+            interval = 0.0005*60/self.expectedSpeed
         GPIO.output(self.pushIO, False)              
         time.sleep(interval)                
         GPIO.output(self.pushIO, True)
@@ -114,10 +125,10 @@ class OrientalMotor(object):
 
     def pull(self):
         self.orientalMotorPullLock.acquire()
-	if self.speed == 0:
+	if self.expectedSpeed == 0:
             interval = 0
         else:
-            interval = 0.0005*60/self.speed
+            interval = 0.0005*60/self.expectedSpeed
         GPIO.output(self.pullIO, False)
         time.sleep(interval)
         GPIO.output(self.pullIO, True)
@@ -132,9 +143,9 @@ class OrientalMotor(object):
 #	print self.position
 #	self.pos_count+= self.position
 
-    def set_pos_speed(self, vol_speed):
-        self.pos_speed = vol_speed*self.re_volsp_possp
-#	print self.pos_speed
+    def set_pos_expectedSpeed(self, vol_speed):
+        self.pos_expectedSpeed = vol_speed*self.re_volsp_possp
+#	print self.pos_expectedSpeed
         
     def continuous_move_position(self):
         while self.pos_flag:                     
@@ -162,8 +173,8 @@ class OrientalMotor(object):
 #	self.idt_motor()
 #	print self.pos_count#######################################2
 	self.set_position(self.pos_count/2)
-#	print self.pos_speed
-	self.set_pos_speed(self.pos_speed/self.re_volsp_possp/2)
+#	print self.pos_expectedSpeed
+	self.set_pos_expectedSpeed(self.pos_speed/self.re_volsp_possp/2)
 	self.position_pull()
 #	print self.get_position_count_sleep_time()
 #	time.sleep(self.get_position_count_sleep_time())
@@ -172,7 +183,7 @@ class OrientalMotor(object):
 
     def stop(self):
 	self.set_position(0)
-	self.set_pos_speed(0)
+	self.set_pos_expectedSpeed(0)
 	self.position_pull()
 	time.sleep(0.01)
 	self.pos_count = 0
@@ -194,12 +205,12 @@ class OrientalMotor(object):
 #	self.orientalMotorPositionPushLock.acquire()
         self.idt_motor()
 #	print self.pos_motor_flag
-        if self.position == 0 or self.pos_speed == 0:
+        if self.position == 0 or self.pos_expectedSpeed == 0:
             distance = 0
 	    interval = 0
 	else:
             distance = int(1000*self.position/self.pos_motor_flag)
-	    interval = 0.0005*60/self.pos_speed*self.pos_motor_flag
+	    interval = 0.0005*60/self.pos_expectedSpeed*self.pos_motor_flag
 #	print distance
 #	print interval
         for i in range(0, distance): 
@@ -214,12 +225,12 @@ class OrientalMotor(object):
     def position_pull(self):
 #	self.orientalMotorPositionPullLock.acquire()
         self.idt_motor()
-	if self.position == 0 or self.pos_speed == 0:
+	if self.position == 0 or self.pos_expectedSpeed == 0:
             distance = 0
             interval = 0
         else:
             distance = int(abs(1000*self.position/self.pos_motor_flag))
-            interval = 0.0005*60/self.pos_speed*self.pos_motor_flag
+            interval = 0.0005*60/self.pos_expectedSpeed*self.pos_motor_flag
 #	print distance
         for i in range(0, distance):
             GPIO.output(self.pullIO, False)              
@@ -230,24 +241,40 @@ class OrientalMotor(object):
 #	self.orientalMotorPositionPullLock.release()
 
     def get_position_sleep_time(self):
-	if self.position == 0 or self.pos_speed == 0:
+	if self.position == 0 or self.pos_expectedSpeed == 0:
 	    return 0.001
 	else:
-#	    self.all_sleep_time+= abs(self.position*60/self.pos_motor_flag/self.pos_speed)
-	    return abs(self.position*60/self.pos_speed)
+#	    self.all_sleep_time+= abs(self.position*60/self.pos_motor_flag/self.pos_expectedSpeed)
+	    return abs(self.position*60/self.pos_expectedSpeed)
 
 
     def get_position_count_sleep_time(self):
-        if self.pos_count == 0 or self.pos_speed == 0:
+        if self.pos_count == 0 or self.pos_expectedSpeed == 0:
             return 0.001
         else:
-#	    print self.pos_count, self.pos_speed
-            return abs(self.pos_count*self.re_vol_pos*60/self.pos_speed)
+#	    print self.pos_count, self.pos_expectedSpeed
+            return abs(self.pos_count*self.re_vol_pos*60/self.pos_expectedSpeed)
+    
+    def setContext(self, context):
+        self.context = context
+
+    def setParameterTypeID(self, ID):
+        self.hapticFeedbackID = ID
+
+    # monitoring the motor status
+    def statusMonitoring(self):
+        # To do..........
+
+
+
+
+        if self.context is not None:
+            self.context.setGlobalParameter(self.hapticFeedbackID, self.expectedSpeed)
 
 """
 motor1 = OrientalMotor(23, 24, False)
 motor1.set_position(2.5)
-motor1.set_pos_speed(10)
+motor1.set_pos_expectedSpeed(10)
 start = time.time()
 motor1.push_contrast_media()
 print time.time()-start

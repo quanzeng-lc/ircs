@@ -21,7 +21,7 @@ class Feedback(object):
         self.parity = parity
         self.stopbits = stopbits
         self.forceFeedback  = 0
-        self.feedbackID = 0
+        self.hapticFeedbackID = 0
         self.context = context
         lockFeedback = threading.Lock()
         #logger = modbus_tk.utils.create_logger("console")
@@ -45,10 +45,7 @@ class Feedback(object):
     #        print "output:", out
             lockFeedback.acquire()
             self.forceFeedback = out
-            if self.feedbackID is FeedbackType.FORCEFEEDBACK:
-                self.context.setGlobalForceFeedback(out)
-            elif self.feedbackID is FeedbackType.TORQUEFEEDBACK:
-                self.context.setGlobalTorqueFeedback(out)
+            self.context.setGlobalParameter(self.hapticFeedbackID, out)
             self.context.setGlobal
             lockFeedabck.release()
             time.sleep(50)
@@ -60,7 +57,7 @@ class Feedback(object):
         return ret
 
     def setID(self, ID):
-        self.feedbackID = ID
+        self.hapticFeedbackID = ID
 
     def start(self):
         self.feedbackTask.start()

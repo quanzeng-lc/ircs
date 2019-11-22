@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 import threading
+from enum import Enum
 #from RCPControl.Feedback import Feedback
 #from OrientalMotor import OrientalMotor
 
@@ -16,6 +17,16 @@ import threading
 # W(t) Roattion Velocity
 # Bid(t) Branch ID
 # --------------------------------------
+
+class GlobalParameterType(Enum):
+    FORCEFEEDBACK = 1
+    TORQUEFEEDBACK = 2
+    DISTANCEFROMCHUCKTOCATHETER = 3
+    TELESCOPICRODLENGTH = 4
+    DISTANCEFROMCATHETERTOGUIDEWIRE = 5
+    GUIDEWIREANGLE = 6
+    TRANSLATIONVELOCITY = 7
+    ROTATIONVELOCITY = 8
 
 class SensingParameter(object):
     def __init__(self):

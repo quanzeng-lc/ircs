@@ -187,9 +187,32 @@ class RCPContext:
     def setGlobalRotationVelocity(self, globalRotationVelocity):
         self.globalRotationVelocity = globalRotationVelocity
 
+    def setGlobalRotationVelocity(self, globalRotationVelocity):
+        self.globalRotationVelocity = globalRotationVelocity
+
     def getGlobalDecisionMade(self):
         ret = self.globalDecisionMade
         return ret
+
+    def setGlobalParameter(self, ID, parameter):
+        if ID is GlobalParameterType.FORCEFEEDBACK:
+            setGlobalForceFeedback(parameter)
+        elif ID is GlobalParameterType.TORQUEFEEDBACK:
+            setGlobalTorqueFeedback(parameter)
+        elif ID is GlobalParameterType.DISTANCEFROMCHUCKTOCATHETER:
+            setGlobalDistanceFromChuckToCatheter(parameter)
+        elif ID is GlobalParameterType.TELESCOPICRODLENGTH:
+            setGlobalTelescopicRodLength(parameter)
+        elif ID is GlobalParameterType.DISTANCEFROMCATHETERTOGUIDEWIRE:
+            setGlobalDistanceFromCatheterToGuidewire(parameter)
+        elif ID is GlobalParameterType.GUIDEWIREANGLE:
+            setGlobalGuidewireAngle(parameter)
+        elif ID is TRANSLATIONVELOCITY:
+            setGlobalTranslationVelocity(parameter)
+        elif ID is GlobalParameterType.ROTATIONVELOCITY:
+            setGlobalRotationVelocity(parameter)
+        else:
+            print("ParameterType error")
 
     def append_close_session_msg(self, close_session_msg):
 	self.closeSessionSequence.append(close_session_msg)

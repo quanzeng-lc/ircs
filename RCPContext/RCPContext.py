@@ -1,5 +1,6 @@
 #-*- coding: utf-8 -*-
 import threading
+import time
 from RCPControl.SensingParameter import SensingParameter
 
 class RCPContext:
@@ -85,13 +86,13 @@ class RCPContext:
         self.globalRotationVelocity = 0.0
         self.globalDecisionMade = 1
 
-        informationAnalysisTask = threading.Thread(None, self.core_information_analysis)
+        informationAnalysisTask = threading.Thread(None, self.coreInformationAnalysis)
         informationAnalysisTask.start()
 
-        decision_making_task = threading.Thread(None, self.decision_making)
-        decision_making_task.start()
+        decisionMaking_task = threading.Thread(None, self.decisionMaking)
+        decisionMaking_task.start()
 
-    def core_information_analysis(self):
+    def coreInformationAnalysis(self):
         while True:
             parameter = SensingParameter()
             parameter.setTimestamps(10)
@@ -104,14 +105,14 @@ class RCPContext:
             parameter.setTranslationVelocity(10)
             parameter.setRotationVelocity(10)
             self.sensingParameterSequence.append(parameter)
-            self.decision_making()
-            time.sleep(30)
+            print "forcefeedback %f, torquefeedback %f", parameter.getForceFeedback(), parameter.getTorqueFeedback()
+            time.sleep(0.03)
 
-    def decision_making(self):
+    def decisionMaking(self):
         while True:
 
             self.globalDecisionMade = 1
-
+            time.sleep(0.01)
         #return ret
 
     def decision_made(self):

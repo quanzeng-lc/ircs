@@ -17,7 +17,7 @@ from enum import Enum
 # W(t) Roattion Velocity
 # Bid(t) Branch ID
 # --------------------------------------
-
+"""
 class GlobalParameterType(Enum):
     FORCEFEEDBACK = 1
     TORQUEFEEDBACK = 2
@@ -27,6 +27,7 @@ class GlobalParameterType(Enum):
     GUIDEWIREANGLE = 6
     TRANSLATIONVELOCITY = 7
     ROTATIONVELOCITY = 8
+"""
 
 class SensingParameter(object):
     def __init__(self):

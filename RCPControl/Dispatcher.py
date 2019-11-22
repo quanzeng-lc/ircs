@@ -4,6 +4,7 @@
 import threading
 import time
 import sys
+from enum import Enum
 from RCPContext.RCPContext import RCPContext
 from OrientalMotor import OrientalMotor
 from Gripper import Gripper
@@ -12,9 +13,15 @@ from InfraredReflectiveSensor import InfraredReflectiveSensor
 from EmergencySwitch import EmergencySwitch
 from RCPCom.FeedbackMsg import FeedbackMsg
 from SensingParameter import SensingParameter
+from GlobalParameterType import GlobalParameterType
 from Feedback import Feedback
 FORCEFEEDBACK = 6
 
+"""
+class GlobalParameterType(Enum):
+    FORCEFEEDBACK =1
+    TORQUEFEEDBACK = 2
+"""    
 
 class Dispatcher(object):
     """
@@ -58,8 +65,8 @@ class Dispatcher(object):
         # -------------------------------------------------------------
         self.forceFeedback = Feedback("/dev/ttyUSB0", 9600, 8, 'N', 1, self.context)
         self.torqueFeedback = Feedback("/dev/ttyUSB1", 9600, 8, 'N', 1, self.context)
-        self.forceFeedback.setID(FeedbackType.FORCEFEEDBACK)
-        self.torqueFeedback.setID(FeedbackType.TORQUEFEEDBACK)
+        self.forceFeedback.setID(GlobalParameterType.FORCEFEEDBACK)
+        self.torqueFeedback.setID(GlobalParameterType.TORQUEFEEDBACK)
         self.forceFeedback.start()
         self.torqueFeedback.start()
 

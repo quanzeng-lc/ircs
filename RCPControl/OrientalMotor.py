@@ -264,12 +264,13 @@ class OrientalMotor(object):
     # monitoring the motor status
     def statusMonitoring(self):
         # To do..........
+        while True:
 
 
 
-
-        if self.context is not None:
-            self.context.setGlobalParameter(self.hapticFeedbackID, self.expectedSpeed)
+            if self.context is not None:
+                self.context.setGlobalParameter(self.hapticFeedbackID, self.expectedSpeed)
+            time.sleep(0.03)
 
 """
 motor1 = OrientalMotor(23, 24, False)

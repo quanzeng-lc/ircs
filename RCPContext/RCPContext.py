@@ -105,7 +105,7 @@ class RCPContext:
             parameter.setTranslationVelocity(10)
             parameter.setRotationVelocity(10)
             self.sensingParameterSequence.append(parameter)
-            print "forcefeedback %f, torquefeedback %f", parameter.getForceFeedback(), parameter.getTorqueFeedback()
+            print "forcefeedback ", parameter.getForceFeedback(), "torquefeedback ", parameter.getTorqueFeedback()
             time.sleep(0.03)
 
     def decisionMaking(self):

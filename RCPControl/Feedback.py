@@ -23,7 +23,7 @@ class Feedback(object):
         self.forceFeedback  = 0
         self.hapticFeedbackID = 0
         self.context = context
-        lockFeedback = threading.Lock()
+        self.lockFeedback = threading.Lock()
         #logger = modbus_tk.utils.create_logger("console")
         try:
             self.master = modbus_rtu.RtuMaster(
@@ -43,11 +43,10 @@ class Feedback(object):
             bb = struct.unpack('>i', struct.pack('>HH', output[0], output[1]))
             out = bb[0]
     #        print "output:", out
-            lockFeedback.acquire()
+            self.lockFeedback.acquire()
             self.forceFeedback = out
             self.context.setGlobalParameter(self.hapticFeedbackID, out)
-            self.context.setGlobal
-            lockFeedabck.release()
+            self.lockFeedback.release()
             time.sleep(50)
 
     def obtainForce(self):

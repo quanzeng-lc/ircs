@@ -2,6 +2,7 @@
 import threading
 import time
 from RCPControl.SensingParameter import SensingParameter
+from RCPControl.GlobalParameterType import GlobalParameterType
 
 class RCPContext:
 
@@ -96,8 +97,8 @@ class RCPContext:
         while True:
             parameter = SensingParameter()
             parameter.setTimestamps(10)
-            parameter.setForceFeedback(10)
-            parameter.setTorqueFeedback(10)
+            parameter.setForceFeedback(self.globalForceFeedback)
+            parameter.setTorqueFeedback(self.globalTorqueFeedback)
             parameter.setDistanceFromChuckToCatheter(10)
             parameter.setTelescopicRodLength(10)
             parameter.setDistanceFromCatheterToGuidewire(10)
@@ -197,21 +198,21 @@ class RCPContext:
 
     def setGlobalParameter(self, ID, parameter):
         if ID is GlobalParameterType.FORCEFEEDBACK:
-            setGlobalForceFeedback(parameter)
+            self.setGlobalForceFeedback(parameter)
         elif ID is GlobalParameterType.TORQUEFEEDBACK:
-            setGlobalTorqueFeedback(parameter)
+            self.setGlobalTorqueFeedback(parameter)
         elif ID is GlobalParameterType.DISTANCEFROMCHUCKTOCATHETER:
-            setGlobalDistanceFromChuckToCatheter(parameter)
+            self.setGlobalDistanceFromChuckToCatheter(parameter)
         elif ID is GlobalParameterType.TELESCOPICRODLENGTH:
-            setGlobalTelescopicRodLength(parameter)
+            self.setGlobalTelescopicRodLength(parameter)
         elif ID is GlobalParameterType.DISTANCEFROMCATHETERTOGUIDEWIRE:
-            setGlobalDistanceFromCatheterToGuidewire(parameter)
+            self.setGlobalDistanceFromCatheterToGuidewire(parameter)
         elif ID is GlobalParameterType.GUIDEWIREANGLE:
-            setGlobalGuidewireAngle(parameter)
+            self.setGlobalGuidewireAngle(parameter)
         elif ID is TRANSLATIONVELOCITY:
-            setGlobalTranslationVelocity(parameter)
+            self.setGlobalTranslationVelocity(parameter)
         elif ID is GlobalParameterType.ROTATIONVELOCITY:
-            setGlobalRotationVelocity(parameter)
+            self.setGlobalRotationVelocity(parameter)
         else:
             print("ParameterType error")
 

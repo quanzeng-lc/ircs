@@ -5,6 +5,7 @@ import threading
 import time
 import sys
 from enum import Enum
+import serial.tools.list_ports
 from RCPContext.RCPContext import RCPContext
 from OrientalMotor import OrientalMotor
 from Gripper import Gripper
@@ -63,8 +64,17 @@ class Dispatcher(object):
         # feedback
         #
         # -------------------------------------------------------------
-        self.forceFeedback = Feedback("/dev/ttyUSB0", 9600, 8, 'N', 1, self.context)
-        self.torqueFeedback = Feedback("/dev/ttyUSB1", 9600, 8, 'N', 1, self.context)
+        portList = list(serial.tools.list_ports.comports())
+        portListUSB = list()
+        if len(portList) == 0:
+            print "no serial port found"
+        else:
+            for i in range(0, len(portList)):
+                port = list(portList[i])[0]
+                portListUSB.append(port)
+        print len(portListUSB)
+        self.forceFeedback = Feedback(portListUSB[0], 9600, 8, 'N', 1, self.context)
+        self.torqueFeedback = Feedback(portListUSB[1], 9600, 8, 'N', 1, self.context)
         self.forceFeedback.setID(GlobalParameterType.FORCEFEEDBACK)
         self.torqueFeedback.setID(GlobalParameterType.TORQUEFEEDBACK)
         self.forceFeedback.start()

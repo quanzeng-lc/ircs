@@ -72,7 +72,7 @@ class Dispatcher(object):
             for i in range(0, len(portList)):
                 port = list(portList[i])[0]
                 portListUSB.append(port)
-        print len(portListUSB)
+        #print len(portListUSB)
         self.forceFeedback = Feedback(portListUSB[0], 9600, 8, 'N', 1, self.context)
         self.torqueFeedback = Feedback(portListUSB[1], 9600, 8, 'N', 1, self.context)
         self.forceFeedback.setID(GlobalParameterType.FORCEFEEDBACK)

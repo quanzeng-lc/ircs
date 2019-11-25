@@ -1,6 +1,8 @@
 #-*- coding: utf-8 -*-
 import threading
 import time
+from threading import Lock
+import csv
 from RCPControl.SensingParameter import SensingParameter
 from RCPControl.GlobalParameterType import GlobalParameterType
 
@@ -93,6 +95,10 @@ class RCPContext:
         decisionMaking_task = threading.Thread(None, self.decisionMaking)
         decisionMaking_task.start()
 
+        self.storingDataLock = Lock()
+        storingDataTask = threading.Thread(None, self.storingData)
+        storingDataTask.start()
+
     def coreInformationAnalysis(self):
         while True:
             parameter = SensingParameter()
@@ -106,7 +112,8 @@ class RCPContext:
             parameter.setTranslationVelocity(10)
             parameter.setRotationVelocity(10)
             self.sensingParameterSequence.append(parameter)
-            print "forcefeedback ", parameter.getForceFeedback(), "torquefeedback ", parameter.getTorqueFeedback()
+            #print 'length',len(self.sensingParameterSequence)
+            #print "forcefeedback ", parameter.getForceFeedback(), "torquefeedback ", parameter.getTorqueFeedback()
             time.sleep(0.03)
 
     def decisionMaking(self):
@@ -119,6 +126,35 @@ class RCPContext:
     def decision_made(self):
         ret = self.decision_made
         return ret
+
+    def storingData(self):
+        while True:
+            data = list()
+            self.storingDataLock.acquire()
+            if len(self.sensingParameterSequence) >= 100:
+                data = self.sensingParameterSequence[0:100]
+                del self.sensingParameterSequence[0:100]
+            self.storingDataLock.release() 
+            path = "./hapticData/hapticFeedback.csv"
+            for var in data:
+                tmpData = list()
+                tmpData.append(str(var.getTimestamps()))
+                tmpData.append(str(var.getForceFeedback()))
+                tmpData.append(str(var.getTorqueFeedback()))
+                tmpData.append(str(var.getDistanceFromChuckToCatheter()))
+                tmpData.append(str(var.getTelescopicRodLength()))
+                tmpData.append(str(var.getDistanceFromCatheterToGuidewire()))
+                tmpData.append(str(var.getGuidewireAngle()))
+                tmpData.append(str(var.getTranslationVelocity()))
+                tmpData.append(str(var.getRotationVelocity()))
+               # for x in tmpData:
+                #    print x
+                with open(path, 'a+') as f:
+                    csv_writer = csv.writer(f)
+                    csv_writer.writerow(tmpData)
+                    #f.write(tmpData[0])
+
+            time.sleep(1)
 
     def clear_guidewire_message(self):
         self.guidewireProgressInstructionSequence = []

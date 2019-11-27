@@ -128,7 +128,7 @@ class Dispatcher(object):
 		print "system terminated"	
 	    else:
                 self.emSwitch = self.switch.read_current_state()
-            
+                #emergency status switch  
                 if self.emSwitch == 1:
                     time.sleep(0.02)
                     self.guidewireRotateMotor.standby()
@@ -187,10 +187,10 @@ class Dispatcher(object):
             if self.draw_back_guidewire_curcuit_flag == False:
                 return 
             if msg.get_motor_orientation() == 0:
-                self.catheterMotor.set_speed(msg.get_motor_speed()/10.0)
+                self.catheterMotor.set_expectedSpeed(msg.get_motor_speed()/10.0)
                 return
             elif msg.get_motor_orientation() == 1:
-                self.catheterMotor.set_speed(-msg.get_motor_speed()/10.0)
+                self.catheterMotor.set_expectedSpeed(-msg.get_motor_speed()/10.0)
                 return
 	# ---------------------------------------------------------------------------------------------
         # guidewire progress execution case
@@ -198,31 +198,32 @@ class Dispatcher(object):
 	if not self.needToRetract: # or not self.need ....
             if self.context.get_guidewire_progress_instruction_sequence_length() > 0:
 		self.set_global_state(self.infraredReflectiveSensor.read_current_state())
+                #print "status:", self.global_state
 		if self.global_state == 0:
                	    msg = self.context.fetch_latest_guidewire_progress_move_msg()
 	   	    if self.draw_back_guidewire_curcuit_flag == False:
                         return 
            	    if msg.get_motor_orientation() == 0 and abs(msg.get_motor_speed()) < 40*2*60:
-			#print -msg.get_motor_speed()
-                        self.guidewireProgressMotor.set_speed(-msg.get_motor_speed())
+			print -msg.get_motor_speed()
+                        self.guidewireProgressMotor.set_expectedSpeed(-msg.get_motor_speed())
               	        self.cptt = 0
                     elif msg.get_motor_orientation() == 1 and abs(msg.get_motor_speed()) < 40*2*60:
-			#print msg.get_motor_speed()
-                        self.guidewireProgressMotor.set_speed(msg.get_motor_speed())
+			print msg.get_motor_speed()
+                        self.guidewireProgressMotor.set_expectedSpeed(msg.get_motor_speed())
 		    else:
-			self.guidewireProgressMotor.set_speed(0)
+			self.guidewireProgressMotor.set_expectedSpeed(0)
 	
 	        elif self.global_state == 2:
-		    #print "retract"
-		    self.guidewireProgressMotor.set_speed(0)
+		    print "retract"
+		    self.guidewireProgressMotor.set_expectedSpeed(0)
 		    self.needToRetract = True
 		    retractTask = threading.Thread(None, self.push_guidewire_back)
        		    retractTask.start()
 		elif self.global_state == 1:
 		    #print "hehe", self.global_guidewire_distance
-		    self.guidewireProgressMotor.set_speed(self.speedProgress)
+		    self.guidewireProgressMotor.set_expectedSpeed(self.speedProgress)
 		elif self.global_state == 3:
-		    self.guidewireProgressMotor.set_speed(0)
+		    self.guidewireProgressMotor.set_expectedSpeed(0)
 	# ---------------------------------------------------------------------------------------------
         # guidewire rotate execution case
         # ---------------------------------------------------------------------------------------------    
@@ -233,10 +234,10 @@ class Dispatcher(object):
                 if self.draw_back_guidewire_curcuit_flag == False:
                     return             
                 if msg.get_motor_orientation() == 0:
-                    self.guidewireRotateMotor.set_speed(speed)
+                    self.guidewireRotateMotor.set_expectedSpeed(speed)
                     pass
                 elif msg.get_motor_orientation() == 1:
-                    self.guidewireRotateMotor.set_speed(-speed)
+                    self.guidewireRotateMotor.set_expectedSpeed(-speed)
                     pass
         # ---------------------------------------------------------------------------------------------
         # contrast media push execution case
@@ -247,9 +248,9 @@ class Dispatcher(object):
             if self.draw_back_guidewire_curcuit_flag == False:
                 return 
             if msg.get_motor_orientation() == 0:
-                self.angioMotor.set_speed(-ret)
+                self.angioMotor.set_expectedSpeed(-ret)
             elif msg.get_motor_orientation() == 1:
-                self.angioMotor.set_speed(ret)
+                self.angioMotor.set_expectedSpeed(ret)
 
         if self.context.get_retract_instruction_sequence_length() > 0:
             if self.draw_back_guidewire_curcuit_flag == False:
@@ -300,13 +301,13 @@ class Dispatcher(object):
 	# self-tightening chunck
         self.gripperBack.gripper_chuck_fasten()
         time.sleep(1)    
-        self.guidewireRotateMotor.set_speed(-self.speedRotate) # +/loosen
+        self.guidewireRotateMotor.set_expectedSpeed(-self.speedRotate) # +/loosen
         time.sleep(self.rotateTime)
-        self.guidewireRotateMotor.set_speed(0)
+        self.guidewireRotateMotor.set_expectedSpeed(0)
         
         #self.gripperFront.gripper_chuck_loosen()
         #time.sleep(1)
-        self.guidewireProgressMotor.set_speed(-self.speedProgress)
+        self.guidewireProgressMotor.set_expectedSpeed(-self.speedProgress)
         #time.sleep(3)
         
             
@@ -321,10 +322,10 @@ class Dispatcher(object):
 	    print "retracting", self.global_state
 	print "back limitation arrived"
 
-        self.guidewireProgressMotor.set_speed(0)
-        self.guidewireRotateMotor.set_speed(self.speedRotate)
+        self.guidewireProgressMotor.set_expectedSpeed(0)
+        self.guidewireRotateMotor.set_expectedSpeed(self.speedRotate)
         time.sleep(self.rotateTime)
-        self.guidewireRotateMotor.set_speed(0)
+        self.guidewireRotateMotor.set_expectedSpeed(0)
 
         self.gripperFront.gripper_chuck_loosen()
         self.gripperBack.gripper_chuck_loosen()
@@ -337,7 +338,7 @@ class Dispatcher(object):
         the shiftboard advance with pushing guidewire
 	"""
         #self.context.clear_guidewire_message()
-    	self.guidewireProgressMotor.set_speed(self.speedProgress)
+    	self.guidewireProgressMotor.set_expectedSpeed(self.speedProgress)
         self.global_state = self.infraredReflectiveSensor.read_current_state()
         while self.global_state !=2:
             time.sleep(0.5)
@@ -345,7 +346,7 @@ class Dispatcher(object):
         #print "pushing", self.global_state
         #print "front limitation arrived"
 
-        self.guidewireProgressMotor.set_speed(0)
+        self.guidewireProgressMotor.set_expectedSpeed(0)
         #self.guidewireRotateMotor.rm_move_to_position(90, -8000)   
         #time.sleep(4)
      
@@ -363,12 +364,12 @@ class Dispatcher(object):
         """
         the shiftboard go back with drawing back guidewire
 	"""
-        self.guidewireRotateMotor.set_speed(self.speedRotate)
+        self.guidewireRotateMotor.set_expectedSpeed(self.speedRotate)
         time.sleep(self.rotateTime)
-        self.guidewireRotateMotor.set_speed(0)
+        self.guidewireRotateMotor.set_expectedSpeed(0)
         self.gripperBack.gripper_chuck_loosen()
         time.sleep(1)
-        self.guidewireProgressMotor.set_speed(-self.speedProgress)
+        self.guidewireProgressMotor.set_expectedSpeed(-self.speedProgress)
         self.global_state = self.infraredReflectiveSensor.read_current_state()
         while self.global_state != 1:
             time.sleep(0.5)
@@ -376,7 +377,7 @@ class Dispatcher(object):
             #print "retracting", self.global_state
         #print "back limitation arrived"
 
-        self.guidewireProgressMotor.set_speed(0)
+        self.guidewireProgressMotor.set_expectedSpeed(0)
         #self.guidewireRotateMotor.rm_move_to_position(85, -4000)
         #time.sleep(4)
         #self.draw_back_guidewire_curcuit_flag == True
@@ -386,16 +387,16 @@ class Dispatcher(object):
     def chuck_loosen(self):
         self.gripperBack.gripper_chuck_fasten()
         time.sleep(1)
-        self.guidewireRotateMotor.set_speed(-self.speedRotate)
+        self.guidewireRotateMotor.set_expectedSpeed(-self.speedRotate)
         time.sleep(self.rotateTime)
-        self.guidewirRotateMotor.set_speed(0)
+        self.guidewirRotateMotor.set_expectedSpeed(0)
 
     def chuck_fasten(self):
         self.gripperBack.gripper_chuck_fasten()
         time.sleep(1)
-        self.guidewireRotateMotor.set_speed(self.speedRotate)
+        self.guidewireRotateMotor.set_expectedSpeed(self.speedRotate)
         time.sleep(self.rotateTime)
-        self.guidewireRotateMotor.set_speed(0)
+        self.guidewireRotateMotor.set_expectedSpeed(0)
 
     def draw_guidewire_advance(self):
         """
@@ -407,10 +408,10 @@ class Dispatcher(object):
         self.gripperFront.gripper_chuck_fasten()
         self.gripperBack.gripper_chuck_fasten()
 	time.sleep(1)
-        self.guidewireRotateMotor.set_speed(-self.speedRotate)
+        self.guidewireRotateMotor.set_expectedSpeed(-self.speedRotate)
         time.sleep(self.rotateTime)
-        self.guidewireRotateMotor.set_speed(0)
-	self.guidewireProgressMotor.set_speed(self.speedProgress)
+        self.guidewireRotateMotor.set_expectedSpeed(0)
+	self.guidewireProgressMotor.set_expectedSpeed(self.speedProgress)
         self.global_state = self.infraredReflectiveSensor.read_current_state()
         while self.global_state !=2:
             time.sleep(0.5)
@@ -418,7 +419,7 @@ class Dispatcher(object):
         #print "advancing", self.global_state
         #print "front limitation arrived"
        
-        self.guidewireProgressMotor.set_speed(0)
+        self.guidewireProgressMotor.set_expectedSpeed(0)
         #self.gripperFront.gripper_chuck_fasten()
         #self.gripperBack.gripper_chuck_fasten()
 	time.sleep(1)
@@ -475,8 +476,8 @@ class Dispatcher(object):
         self.draw_back_guidewire_curcuit_flag == True
         self.needToRetract = False
 
-        self.guidewireProgressMotor.set_speed(self.speedProgress)
-        self.catheterMotor.set_speed(self.speedCatheter)
+        self.guidewireProgressMotor.set_expectedSpeed(self.speedProgress)
+        self.catheterMotor.set_expectedSpeed(self.speedCatheter)
         self.global_state = self.infraredReflectiveSensor.read_current_state()
         while self.global_state !=2:
             time.sleep(0.5)
@@ -484,8 +485,8 @@ class Dispatcher(object):
         #print "pushing", self.global_state
         #print "front limitation arrived"
 
-        self.guidewireProgressMotor.set_speed(0)
-        self.catheterMotor.set_speed(0)
+        self.guidewireProgressMotor.set_expectedSpeed(0)
+        self.catheterMotor.set_expectedSpeed(0)
         #self.guidewireRotateMotor.rm_move_to_position(90, -8000)
         #time.sleep(4)
        
@@ -502,13 +503,13 @@ class Dispatcher(object):
         # self-tightening chunck
         self.gripperBack.gripper_chuck_fasten()
         time.sleep(1)
-        self.guidewireRotateMotor.set_speed(-self.speedRotate) # +/loosen
+        self.guidewireRotateMotor.set_expectedSpeed(-self.speedRotate) # +/loosen
         time.sleep(self.rotateTime)
-        self.guidewireRotateMotor.set_speed(0)
+        self.guidewireRotateMotor.set_expectedSpeed(0)
 
         #self.gripperFront.gripper_chuck_loosen()
         #time.sleep(1)
-        self.guidewireProgressMotor.set_speed(-self.speedProgress)
+        self.guidewireProgressMotor.set_expectedSpeed(-self.speedProgress)
 
         self.global_state = self.infraredReflectiveSensor.read_current_state()
         while self.global_state != 1:
@@ -517,10 +518,10 @@ class Dispatcher(object):
             print "retracting", self.global_state
             print "back limitation arrived"
 
-        self.guidewireProgressMotor.set_speed(0)
-        self.guidewireRotateMotor.set_speed(self.speedRotate)
+        self.guidewireProgressMotor.set_expectedSpeed(0)
+        self.guidewireRotateMotor.set_expectedSpeed(self.speedRotate)
         time.sleep(self.rotateTime)
-        self.guidewireRotateMotor.set_speed(0)
+        self.guidewireRotateMotor.set_expectedSpeed(0)
     def multitime_catheter_advance(self):
         """
         the process of guidewire and cathter advance by turns for several times
@@ -540,7 +541,7 @@ class Dispatcher(object):
         self.define_number_of_cycles()
         for i in range (0,self.number_of_cycles):
             self.draw_guidewire_back()
-            self.catheterMotor.set_speed(self.speedCatheter)
+            self.catheterMotor.set_expectedSpeed(self.speedCatheter)
             print(i)
     
     def initialization(self):
@@ -564,7 +565,7 @@ class Dispatcher(object):
 
         #self.gripperFront.gripper_chuck_loosen()
         #time.sleep(1)
-        self.guidewireProgressMotor.set_speed(-self.speedProgress)
+        self.guidewireProgressMotor.set_expectedSpeed(-self.speedProgress)
 
         self.global_state = self.infraredReflectiveSensor.read_current_state()
         while self.global_state != 1:
@@ -573,10 +574,10 @@ class Dispatcher(object):
             print "retracting", self.global_state
             print "back limitation arrived"
 
-        self.guidewireProgressMotor.set_speed(0)
-        self.guidewireRotateMotor.set_speed(self.speedRotate)
+        self.guidewireProgressMotor.set_expectedSpeed(0)
+        self.guidewireRotateMotor.set_expectedSpeed(self.speedRotate)
         time.sleep(self.rotateTime)
-        self.guidewireRotateMotor.set_speed(0)
+        self.guidewireRotateMotor.set_expectedSpeed(0)
 
         self.gripperFront.gripper_chuck_loosen()
         self.gripperBack.gripper_chuck_loosen()
@@ -584,7 +585,7 @@ class Dispatcher(object):
         self.needToRetract = False
 
     def catheter(self):
-	self.catheterMotor.set_speed(self.speedCatheter)
+	self.catheterMotor.set_expectedSpeed(self.speedCatheter)
      
     def define_number_of_cycles(self):
         """
@@ -667,9 +668,9 @@ self.gripperFront.gripper_chuck_loosen()
 """
 import sys
 dispatcher =  Dispatcher(1, 1)
-dispatcher.guidewireProgressMotor.set_speed(400)
+dispatcher.guidewireProgressMotor.set_expectedSpeed(400)
 time.sleep(2)
-dispatcher.guidewireProgressMotor.set_speed(0)
+dispatcher.guidewireProgressMotor.set_expectedSpeed(0)
 """
 
 # test of contrast agent

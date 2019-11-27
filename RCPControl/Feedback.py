@@ -49,7 +49,7 @@ class Feedback(object):
                 self.context.setGlobalParameter(self.hapticFeedbackID, out)
                 self.lockFeedback.release()
             except Exception as e:
-                print "serial abnormal", e
+                print "serial abnormal:", e
             time.sleep(0.01)
 
     def obtainForce(self):

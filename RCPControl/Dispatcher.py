@@ -7,7 +7,11 @@ import sys
 from enum import Enum
 import serial.tools.list_ports
 from RCPContext.RCPContext import RCPContext
-from OrientalMotor import OrientalMotor
+#from OrientalMotor import OrientalMotor
+from RCPControl.Motor.AdvanceOrientalMotor import AdvanceOrientalMotor
+from RCPControl.Motor.AngioOrientalMotor import AngioOrientalMotor
+from RCPControl.Motor.RotateOrientalMotor import RotateOrientalMotor
+from RCPControl.Motor.CatheterOrientalMotor import CatheterOrientalMotor
 from Gripper import Gripper
 from MaxonMotor import MaxonMotor
 from InfraredReflectiveSensor import InfraredReflectiveSensor
@@ -18,11 +22,6 @@ from GlobalParameterType import GlobalParameterType
 from Feedback import Feedback
 FORCEFEEDBACK = 6
 
-"""
-class GlobalParameterType(Enum):
-    FORCEFEEDBACK =1
-    TORQUEFEEDBACK = 2
-"""    
 
 class Dispatcher(object):
     """
@@ -47,12 +46,12 @@ class Dispatcher(object):
 	# ---------------------------------------------------------------------------------------------
 	# execution units of the interventional robot
 	# ---------------------------------------------------------------------------------------------
-        self.guidewireProgressMotor = OrientalMotor(20, 21, True)
+        self.guidewireProgressMotor = AdvanceOrientalMotor()
         self.guidewireProgressMotor.setParameterTypeID(GlobalParameterType.TRANSLATIONVELOCITY)
-        self.guidewireRotateMotor = OrientalMotor(19, 26, True)
+        self.guidewireRotateMotor = RotateOrientalMotor()
         self.guidewireRotateMotor.setParameterTypeID(GlobalParameterType.ROTATIONVELOCITY)
-        self.catheterMotor = OrientalMotor(17, 27, True)
-        self.angioMotor = OrientalMotor(23, 24, False)
+        self.catheterMotor = CatheterOrientalMotor()
+        self.angioMotor = AngioOrientalMotor()
         self.gripperFront = Gripper(7)
         self.gripperBack = Gripper(8)
 	
@@ -60,6 +59,7 @@ class Dispatcher(object):
         # sensors
         # ---------------------------------------------------------------------------------------------
         self.infraredReflectiveSensor = InfraredReflectiveSensor()
+
         # --------------------------------------------------------------
         # feedback
         #
@@ -91,14 +91,14 @@ class Dispatcher(object):
         # ---------------------------------------------------------------------------------------------
         # speed parameters
         # ---------------------------------------------------------------------------------------------
-        self.speedProgress = 1000 
-        self.speedRotate = 60
-        self.speedCatheter =10
-        self.rotateTime = 180/self.speedRotate
+        self.speedProgress = 5 
+        self.speedRotate = 8
+        self.speedCatheter = 2
+        self.rotateTime = 360/self.speedRotate
 
-        self.pos_speed = 5
-        self.position_cgf = 2
-        self.position_cgb = -100
+        #self.pos_speed = 2
+        #self.position_cgf = 1
+        #self.position_cgb = 2
 
 	# -------------------------------------------------------------------------
         # real time task to parse commandes in context
@@ -165,18 +165,6 @@ class Dispatcher(object):
 	"""
         decode messages in the sequence and performe operations
         """
-        # ------------------------------------------------------------------------------
-        # advance according the set distance
-        # -----------------------------------------------------------------------------
-        """
-        if self.context.get_catheter_guidewire_push_sequence_lenght() > 0:
-            msg = self.context.fetch_latest_catheter_guidewire_push_msg()
-            if self.draw_back_guidewire_curcuit_flag == False:
-                return 
-            speed = msg.get_motor_speed()
-            relative_position = msg.get_motor_relative_distance()
-        """
-
 
 	# ---------------------------------------------------------------------------------------------
         # catheter execution case
@@ -187,10 +175,10 @@ class Dispatcher(object):
             if self.draw_back_guidewire_curcuit_flag == False:
                 return 
             if msg.get_motor_orientation() == 0:
-                self.catheterMotor.set_expectedSpeed(msg.get_motor_speed()/10.0)
+                self.catheterMotor.set_expectedSpeed(msg.get_motor_speed()/40.0)
                 return
             elif msg.get_motor_orientation() == 1:
-                self.catheterMotor.set_expectedSpeed(-msg.get_motor_speed()/10.0)
+                self.catheterMotor.set_expectedSpeed(-msg.get_motor_speed()/40.0)
                 return
 	# ---------------------------------------------------------------------------------------------
         # guidewire progress execution case
@@ -199,20 +187,23 @@ class Dispatcher(object):
             if self.context.get_guidewire_progress_instruction_sequence_length() > 0:
 		self.set_global_state(self.infraredReflectiveSensor.read_current_state())
                 #print "status:", self.global_state
+                # forward infraredreflection and backward infraredflection are both invalid
 		if self.global_state == 0:
                	    msg = self.context.fetch_latest_guidewire_progress_move_msg()
 	   	    if self.draw_back_guidewire_curcuit_flag == False:
                         return 
-           	    if msg.get_motor_orientation() == 0 and abs(msg.get_motor_speed()) < 40*2*60:
+           	    if msg.get_motor_orientation() == 0 and abs(msg.get_motor_speed()) < 460:
 			print -msg.get_motor_speed()
-                        self.guidewireProgressMotor.set_expectedSpeed(-msg.get_motor_speed())
+                        self.guidewireProgressMotor.enable()
+                        self.guidewireProgressMotor.set_expectedSpeed(-msg.get_motor_speed()/20)
               	        self.cptt = 0
-                    elif msg.get_motor_orientation() == 1 and abs(msg.get_motor_speed()) < 40*2*60:
+                    elif msg.get_motor_orientation() == 1 and abs(msg.get_motor_speed()) < 460:
 			print msg.get_motor_speed()
-                        self.guidewireProgressMotor.set_expectedSpeed(msg.get_motor_speed())
+                        self.guidewireProgressMotor.enable()
+                        self.guidewireProgressMotor.set_expectedSpeed(msg.get_motor_speed()/20)
 		    else:
 			self.guidewireProgressMotor.set_expectedSpeed(0)
-	
+	        # forward infraredreflection valid
 	        elif self.global_state == 2:
 		    print "retract"
 		    self.guidewireProgressMotor.set_expectedSpeed(0)
@@ -220,8 +211,12 @@ class Dispatcher(object):
 		    retractTask = threading.Thread(None, self.push_guidewire_back)
        		    retractTask.start()
 		elif self.global_state == 1:
+                    # back infraredreflection valid
 		    #print "hehe", self.global_guidewire_distance
+                    self.guidewireProgressMotor.enable()
 		    self.guidewireProgressMotor.set_expectedSpeed(self.speedProgress)
+                    self.
+                # forward infraredreflection and backward minfraredreflection are both valid
 		elif self.global_state == 3:
 		    self.guidewireProgressMotor.set_expectedSpeed(0)
 	# ---------------------------------------------------------------------------------------------
@@ -234,10 +229,10 @@ class Dispatcher(object):
                 if self.draw_back_guidewire_curcuit_flag == False:
                     return             
                 if msg.get_motor_orientation() == 0:
-                    self.guidewireRotateMotor.set_expectedSpeed(speed)
+                    self.guidewireRotateMotor.set_expectedSpeed(speed/40.0)
                     pass
                 elif msg.get_motor_orientation() == 1:
-                    self.guidewireRotateMotor.set_expectedSpeed(-speed)
+                    self.guidewireRotateMotor.set_expectedSpeed(-speed/40.0)
                     pass
         # ---------------------------------------------------------------------------------------------
         # contrast media push execution case
@@ -248,9 +243,9 @@ class Dispatcher(object):
             if self.draw_back_guidewire_curcuit_flag == False:
                 return 
             if msg.get_motor_orientation() == 0:
-                self.angioMotor.set_expectedSpeed(-ret)
+                self.angioMotor.set_expectedSpeed(-ret/40.0)
             elif msg.get_motor_orientation() == 1:
-                self.angioMotor.set_expectedSpeed(ret)
+                self.angioMotor.set_expectedSpeed(ret/40.0)
 
         if self.context.get_retract_instruction_sequence_length() > 0:
             if self.draw_back_guidewire_curcuit_flag == False:
@@ -262,11 +257,11 @@ class Dispatcher(object):
             #print "injection command", msg.get_speed(),msg.get_volume()
 	   
             if msg.get_volume() < 0:
-                self.angioMotor.set_pos_speed(msg.get_speed())
+                self.angioMotor.set_pos_speed(msg.get_speed()/40.0)
                 self.angioMotor.set_position(msg.get_volume()/4.5)
                 self.angioMotor.pull_contrast_media()
             elif msg.get_volume() <= 30:		
-	    	self.angioMotor.set_pos_speed(msg.get_speed())
+	    	self.angioMotor.set_pos_speed(msg.get_speed()/40.0)
 	   	self.angioMotor.set_position(msg.get_volume()/4.5)
 	    	self.angioMotor.push_contrast_media()
 

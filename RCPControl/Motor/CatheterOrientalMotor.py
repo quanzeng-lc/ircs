@@ -5,10 +5,10 @@ import RPi.GPIO as GPIO
 import time
 import threading
 from AdvanceMotor import AdvanceMotor
-#from RCPContext.RCPContext import RCPContext
+from RCPContext.RCPContext import RCPContext
 
 # max velocity 10 mm/s
-class AdvanceOrientalMotor(AdvanceMotor):
+class CatheterOrientalMotor(AdvanceMotor):
     def __init__(self):
         
         self.orientalMotorPushLock = threading.Lock()
@@ -17,8 +17,8 @@ class AdvanceOrientalMotor(AdvanceMotor):
 #	self.orientalMotorPositionPullLock = threading.Lock()
         GPIO.setmode(GPIO.BCM)
         GPIO.setwarnings(False)
-        self.pushIO = 20
-        self.pullIO = 21
+        self.pushIO = 17
+        self.pullIO = 27
         GPIO.setup(self.pushIO, GPIO.OUT, initial=GPIO.HIGH)
         GPIO.setup(self.pullIO, GPIO.OUT, initial=GPIO.HIGH)
         
@@ -31,21 +31,22 @@ class AdvanceOrientalMotor(AdvanceMotor):
 	self.mode = True
 
         #velocity mode
-        self.expectedSpeed = 0
+        self.expectedSpeed = 0   # mm/s
         self.flag = True
         self.expectedSpeedFlag = 0
         self.count = 0
         # high/low level time interval
         self.velocity_mode_interval = 9999
         # the distance for every circle
-        self.dis_circle = 5 #mm
-        self.deg_pulse = 0.36 #degree for every pulse
-        
+        self.roller_diameter = 26.5  # mm/s
+        self.pi_efficient = 3.14
+        self.deg_pulse = 0.36   # degree for one pulse
+
         #position mode
         self.pos_motor_flag = 1
 	self.pos_flag = True
         self.position = 0
-        self.pos_mode_expectedSpeed = 0
+        self.pos_mode_expectedSpeed = 0    # mm/s
         self.pos_mode_expeected_flag = 0
         self.pos_mode_interval = 9999
 	
@@ -82,10 +83,10 @@ class AdvanceOrientalMotor(AdvanceMotor):
     def set_expectedSpeed(self, speed):
         if speed > 0:
             self.expectedSpeedFlag = 1
-            self.interval = (self.dis_circle*self.deg_pulse)/(speed*360*2.0)
+            self.interval = (self.roller_diameter*self.pi_efficient*self.deg_pulse) / (speed*180*2.0*2.0)
         elif speed < 0:
             self.expectedSpeedFlag = 2
-            self.interval = abs((self.dis_circle*self.deg_pulse)/(speed*360*2.0))
+            self.interval = abs((self.roller_diameter*self.pi_efficient*self.deg_pulse) / (speed*180*2.0*2.0))
         elif speed == 0:
 	    self.expectedSpeedFlag = 0
             self.interval = 9999
@@ -154,16 +155,16 @@ class AdvanceOrientalMotor(AdvanceMotor):
 
     #Position Mode    #############################1
     def set_position(self, position):
-        self.position = position
-        self.distance_pulse = int((position*360)/(self.dis_circle*self.deg_pulse))
+        self.position = abs(position)
+        self.distance_pulse = int((self.position*2*180) / (self.roller_diameter*self.pi_efficient*self.deg_pulse))
 #	print self.position
 
     def set_pos_mode_expectedSpeed(self, speed):
         if speed > 0:
-            self.pos_mode_interval = (self.dis_circle*self.deg_pulse)/(speed*360*2.0)
+            self.pos_mode_interval = (self.roller_diameter*self.pi_efficient*self.deg_pulse) / (speed*180*2.0*2.0)
             self.pos_mod_expected_flag = 1
         elif speed < 0:
-            self.pos_mode_interval = abs((self.dis_circle*self.deg_pulse)/(speed*360*2.0))
+            self.pos_mode_interval = abs((self.roller_diameter*self.pi_efficient*self.deg_pulse) / (speed*180*2.0*2.0))
             self.pos_mod_expected_flag = 2
         elif speed == 0:
             self.pos_mode_interval = 9999
@@ -255,14 +256,14 @@ class AdvanceOrientalMotor(AdvanceMotor):
             time.sleep(0.03)
 
 """
-motor1 = AdvanceOrientalMotor()
+motor1 = CatheterOrientalMotor()
 motor1.enable()
+#motor1.set_position(50)
+#motor1.set_pos_mode_expectedSpeed(-5)
+start = time.time()
 motor1.set_expectedSpeed(1)
-#motor1.set_position(5)
-#motor1.set_pos_mode_expectedSpeed(-2)
 time.sleep(2)
 motor1.stop()
-start = time.time()
 motor1.position_move()
 print time.time()-start
 #motor1.stop()

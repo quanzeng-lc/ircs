@@ -3,22 +3,32 @@
 
 class AdvanceMotor(object):
 
+    # open device
     def open_device(self):
         pass
-
+    
+    # close device
     def close_device(self):
         pass
-
-    def close_position_device(self):
+    
+    # enable the motor
+    def enable(self):
         pass
 
-    def set_expectedSpeed(self, speed):
-        pass
-
+    # inable the motor
     def standby(self):
         pass
 
-    def enable(self):
+    # set the mode: speed mode or position mode
+    def set_mode(self):
+        pass
+
+
+    def close_position_device(self):
+        pass
+    
+    # set speed mode expected speed 
+    def set_expectedSpeed(self, speed):
         pass
 
     def continuous_move(self):

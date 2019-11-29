@@ -22,17 +22,21 @@ class AdvanceOrientalMotor(AdvanceMotor):
         GPIO.setup(self.pushIO, GPIO.OUT, initial=GPIO.HIGH)
         GPIO.setup(self.pullIO, GPIO.OUT, initial=GPIO.HIGH)
         
+        # store the global oarameter
         self.context = None
 
-        #parametertype id
+        # parametertype id
         self.hapticFeedbackID = 0
 
-	#mode choose
+        # mode choose/default mode: speed mode
 	self.mode = True
+        # judge whether the motor is moving 
+        self.is_moving = False
 
-        #velocity mode
+        self.is_open = False
+
+        # velocity mode
         self.expectedSpeed = 0
-        self.flag = True
         self.expectedSpeedFlag = 0
         self.count = 0
         # high/low level time interval
@@ -71,10 +75,28 @@ class AdvanceOrientalMotor(AdvanceMotor):
 
 
     def open_device(self):
-        self.flag = True
+        if self.is_open == True:
+            print "Motor is already open!"
+            return 
+        self.is_open = True
 
     def close_device(self):
-	self.flag = False
+	self.is_open = False
+
+    def standby(self):
+        if self.is_moving  == True:
+            print "Warning: Motor is moving!"
+            return
+        if self.mv_enable == False:
+            print "Warning: Motor is alraedy not enable!"
+            return
+        self.mv_enable = False
+    
+    def enable(self):
+        if self.mv_enable == True:
+            print "Warning: motor is already enable!"
+            return 
+        self.mv_enable = True
 
     def close_position_device(self):
 	self.pos_flag = False
@@ -91,16 +113,6 @@ class AdvanceOrientalMotor(AdvanceMotor):
             self.interval = 9999
         self.expectedSpeed = abs(speed)
    
-    def standby(self):
-        if self.mv_enable == False:
-            return
-        self.mv_enable = False
-    
-    def enable(self):
-        if self.mv_enable == True:
-            return
-        self.mv_enable = True
-
     def continuous_move(self):
         while self.flag:            
             if self.mv_enable:
@@ -129,12 +141,12 @@ class AdvanceOrientalMotor(AdvanceMotor):
 	else:
             interval = self.interval
             #print "interval:", interval
+        self.orientalMotorPushLock.release()
         GPIO.output(self.pushIO, False)              
         time.sleep(interval)                
         GPIO.output(self.pushIO, True)
         time.sleep(interval)
         self.count += 1
-        self.orientalMotorPushLock.release()
 
     def pull(self):
         self.orientalMotorPullLock.acquire()
@@ -144,12 +156,12 @@ class AdvanceOrientalMotor(AdvanceMotor):
             return 
         else:
             interval = self.interval
+        self.orientalMotorPullLock.release()
         GPIO.output(self.pullIO, False)
         time.sleep(interval)
         GPIO.output(self.pullIO, True)
         time.sleep(interval) 
         self.count += 1
-        self.orientalMotorPullLock.release()
 
 
     #Position Mode    #############################1

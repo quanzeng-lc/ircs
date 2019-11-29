@@ -4,7 +4,7 @@ import modbus_tk.defines as cst
 from modbus_tk import modbus_rtu
 import struct
 import threading
-from RCPContext.RCPContext import RCPContext
+#from RCPContext.RCPContext import RCPContext
 import time
 import sys
 

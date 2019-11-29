@@ -245,11 +245,13 @@ class OrientalMotor(object):
             return abs(self.pos_count*self.re_vol_pos*60/self.pos_speed)
 
 """
-motor1 = OrientalMotor(23, 24, False)
-motor1.set_position(2.5)
-motor1.set_pos_speed(10)
+motor1 = OrientalMotor(19, 26, False)
+#motor1.set_position(2.5)
+#motor1.set_pos_speed(10)
+motor1.set_speed(-1)
 start = time.time()
+motor1.stop()
 motor1.push_contrast_media()
 print time.time()-start
-#motor1.stop()
+#motor1.stop()"
 """

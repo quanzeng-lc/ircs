@@ -4,14 +4,14 @@
 import threading
 import time
 import sys
-from RCPContext.RCPContext import RCPContext
+#from RCPContext.RCPContext import RCPContext
 from OrientalMotor import OrientalMotor
 from Gripper import Gripper
 from MaxonMotor import MaxonMotor
 from InfraredReflectiveSensor import InfraredReflectiveSensor
 from EmergencySwitch import EmergencySwitch
 from Feedback import Feedback
-from RCPCom.FeedbackMsg import FeedbackMsg
+#from RCPCom.FeedbackMsg import FeedbackMsg
 FORCEFEEDBACK = 6
 
 class Dispatcher(object):
@@ -65,7 +65,7 @@ class Dispatcher(object):
         # ---------------------------------------------------------------------------------------------
         # speed parameters
         # ---------------------------------------------------------------------------------------------
-        self.speedProgress = 1000 
+        self.speedProgress = 1000/2 
         self.speedRotate = 60
         self.speedCatheter =10
         self.rotateTime = 180/self.speedRotate
@@ -77,11 +77,11 @@ class Dispatcher(object):
 	# ---------------------------------------------------------------------------------------------
         # real time task to parse commandes in context
         # ---------------------------------------------------------------------------------------------
-       	self.dispatchTask = threading.Thread(None, self.do_parse_commandes_in_context)
-       	self.dispatchTask.start()
+       	#self.dispatchTask = threading.Thread(None, self.do_parse_commandes_in_context)
+       	#self.dispatchTask.start()
 
-        self.aquirefeedbackTask = threading.Thread(None, self.aquirefeedback_context)
-        self.aquirefeedbackTask.start()
+        #self.aquirefeedbackTask = threading.Thread(None, self.aquirefeedback_context)
+        #self.aquirefeedbackTask.start()
         
     def set_global_state(self, state):
 	self.global_state = state	
@@ -249,7 +249,7 @@ class Dispatcher(object):
         """
         the shifboard get back when guidewire progress
 	"""
-        self.context.clear_guidewire_message()
+        #self.context.clear_guidewire_message()
         self.draw_back_guidewire_curcuit_flag == False
         
 	#self.gripperFront.gripper_chuck_loosen()
@@ -262,7 +262,7 @@ class Dispatcher(object):
 	# self-tightening chunck
         self.gripperBack.gripper_chuck_fasten()
         time.sleep(1)    
-        self.guidewireRotateMotor.set_speed(-self.speedRotate) # +/loosen
+        self.guidewireRotateMotor.set_speed(self.speedRotate) # +/loosen
         time.sleep(self.rotateTime)
         self.guidewireRotateMotor.set_speed(0)
         
@@ -284,14 +284,14 @@ class Dispatcher(object):
 	print "back limitation arrived"
 
         self.guidewireProgressMotor.set_speed(0)
-        self.guidewireRotateMotor.set_speed(self.speedRotate)
+        self.guidewireRotateMotor.set_speed(-self.speedRotate)
         time.sleep(self.rotateTime)
         self.guidewireRotateMotor.set_speed(0)
 
         self.gripperFront.gripper_chuck_loosen()
         self.gripperBack.gripper_chuck_loosen()
         self.draw_back_guidewire_curcuit_flag == True
-	self.context.clear_guidewire_message()
+	#self.context.clear_guidewire_message()
         self.needToRetract = False
    
     def push_guidewire_advance(self):
@@ -300,13 +300,14 @@ class Dispatcher(object):
 	"""
         #self.context.clear_guidewire_message()
     	self.guidewireProgressMotor.set_speed(self.speedProgress)
+        self.guidewireRotateMotor.set_speed(self.speedRotate/5)
         self.global_state = self.infraredReflectiveSensor.read_current_state()
         while self.global_state !=2:
             time.sleep(0.5)
             self.global_state = self.infraredReflectiveSensor.read_current_state()
         #print "pushing", self.global_state
         #print "front limitation arrived"
-
+        self.guidewireRotateMotor.set_speed(0)
         self.guidewireProgressMotor.set_speed(0)
         #self.guidewireRotateMotor.rm_move_to_position(90, -8000)   
         #time.sleep(4)
@@ -387,8 +388,8 @@ class Dispatcher(object):
         #self.guidewireRotateMotor.rm_move_to_position(80, -4000)
         #time.sleep(3)
        
-       # self.gripperFront.gripper_chuck_fasten()
-       # time.sleep(1)
+        #self.gripperFront.gripper_chuck_fasten()
+        #time.sleep(1)
 	#self.gripperFront.gripper_chuck_loosen()
         #self.gripperBack.gripper_chuck_loosen()
 	#time.sleep(1)
@@ -483,6 +484,7 @@ class Dispatcher(object):
         self.guidewireRotateMotor.set_speed(self.speedRotate)
         time.sleep(self.rotateTime)
         self.guidewireRotateMotor.set_speed(0)
+
     def multitime_catheter_advance(self):
         """
         the process of guidewire and cathter advance by turns for several times
@@ -554,6 +556,7 @@ class Dispatcher(object):
 	"""
         self.number_of_cycles = input("please input the number of cycles")
 	
+    """
     def aquirefeedback_context(self):
         while True:
             feedbackMsg = FeedbackMsg()
@@ -580,14 +583,14 @@ class Dispatcher(object):
             feedbackMsg.set_torque_value(torquevalue)
             self.context.append_latest_forcefeedback_msg(feedbackMsg)
             #print("data", forcevalue, torquevalue)
-
+    """
 
 # test push guidewire automatically for several times"
-"""
+
 import sys        
 dispatcher =  Dispatcher(1, 1)
 dispatcher.multitime_push_guidewire()
-"""
+
 # test guidewire and cahteter advance by turns
 """
 import sys

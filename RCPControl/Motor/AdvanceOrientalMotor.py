@@ -33,7 +33,7 @@ class AdvanceOrientalMotor(AdvanceMotor):
         # judge whether the motor is moving 
         self.is_moving = False
 
-        self.is_open = False
+        self.flag = True
 
         # velocity mode
         self.expectedSpeed = 0
@@ -75,26 +75,23 @@ class AdvanceOrientalMotor(AdvanceMotor):
 
 
     def open_device(self):
-        if self.is_open == True:
+        if self.flag == True:
             print "Motor is already open!"
             return 
-        self.is_open = True
+        self.flag = True
 
     def close_device(self):
-	self.is_open = False
+	self.flag = False
 
     def standby(self):
-        if self.is_moving  == True:
-            print "Warning: Motor is moving!"
-            return
         if self.mv_enable == False:
-            print "Warning: Motor is alraedy not enable!"
+            #print "Warning: Motor is alraedy not enable!"
             return
         self.mv_enable = False
     
     def enable(self):
         if self.mv_enable == True:
-            print "Warning: motor is already enable!"
+            #print "Warning: motor is already enable!"
             return 
         self.mv_enable = True
 
@@ -141,12 +138,12 @@ class AdvanceOrientalMotor(AdvanceMotor):
 	else:
             interval = self.interval
             #print "interval:", interval
-        self.orientalMotorPushLock.release()
         GPIO.output(self.pushIO, False)              
         time.sleep(interval)                
         GPIO.output(self.pushIO, True)
         time.sleep(interval)
-        self.count += 1
+        self.orientalMotorPushLock.release()
+        #self.count += 1
 
     def pull(self):
         self.orientalMotorPullLock.acquire()
@@ -156,12 +153,12 @@ class AdvanceOrientalMotor(AdvanceMotor):
             return 
         else:
             interval = self.interval
-        self.orientalMotorPullLock.release()
         GPIO.output(self.pullIO, False)
         time.sleep(interval)
         GPIO.output(self.pullIO, True)
         time.sleep(interval) 
-        self.count += 1
+        self.orientalMotorPullLock.release()
+        #self.count += 1
 
 
     #Position Mode    #############################1
@@ -269,12 +266,12 @@ class AdvanceOrientalMotor(AdvanceMotor):
 """
 motor1 = AdvanceOrientalMotor()
 motor1.enable()
-motor1.set_expectedSpeed(1)
+motor1.set_expectedSpeed(2)
 #motor1.set_position(5)
 #motor1.set_pos_mode_expectedSpeed(-2)
+start = time.time()
 time.sleep(2)
 motor1.stop()
-start = time.time()
 #motor1.position_move()
 print time.time()-start
 #motor1.stop()

@@ -6,7 +6,7 @@ import struct
 import threading
 import time
 import sys
-from RCPContext.RCPContext import RCPContext
+#from RCPContext.RCPContext import RCPContext
 
 # PORT = 1 
 #PORT = "/dev/ttyUSB0"

@@ -1,6 +1,10 @@
 #-*- coding: utf-8 -*-
 import threading
-
+import time
+from threading import Lock
+import csv
+from RCPControl.SensingParameter import SensingParameter
+from RCPControl.GlobalParameterType import GlobalParameterType
 
 class RCPContext:
 
@@ -38,6 +42,9 @@ class RCPContext:
 
 	# system control
 	self.closeSessionSequence = []
+        
+
+        self.sensingParameterSequence = []
 
 	# ---------------------------------------------------------------------------------------------
         # system status variable 
@@ -70,12 +77,85 @@ class RCPContext:
         self.guidewireControlState = 0
         self.catheterControlState = 0
         self.contrastMediaControlState = 0
-
-        self.globalGuidewireDistance = 0
-        self.globalGuidewireAngle = 0
-        self.globalCatheterDistance = 0
         self.globalContrastMediaVolumn = 0
-    
+
+        self.globalForceFeedback = 0.0
+        self.globalTorqueFeedback = 0.0
+        self.globalDistanceFromChuckToCatheter = 0.0
+        self.globalTelescopicRodLength = 0.0
+        self.globalDistanceFromCatheterToGuidewire = 0.0
+        self.globalGuidewireAngle = 0.0
+        self.globalTranslationVelocity = 0.0
+        self.globalRotationVelocity = 0.0
+        self.globalDecisionMade = 1
+
+        informationAnalysisTask = threading.Thread(None, self.coreInformationAnalysis)
+        informationAnalysisTask.start()
+
+        decisionMaking_task = threading.Thread(None, self.decisionMaking)
+        decisionMaking_task.start()
+
+        self.storingDataLock = Lock()
+        storingDataTask = threading.Thread(None, self.storingData)
+        storingDataTask.start()
+
+    def coreInformationAnalysis(self):
+        while True:
+            parameter = SensingParameter()
+            parameter.setTimestamps(10)
+            parameter.setForceFeedback(self.globalForceFeedback)
+            parameter.setTorqueFeedback(self.globalTorqueFeedback)
+            parameter.setDistanceFromChuckToCatheter(10)
+            parameter.setTelescopicRodLength(10)
+            parameter.setDistanceFromCatheterToGuidewire(10)
+            parameter.setGuidewireAngle(10)
+            parameter.setTranslationVelocity(10)
+            parameter.setRotationVelocity(10)
+            self.sensingParameterSequence.append(parameter)
+            #print 'length',len(self.sensingParameterSequence)
+            #print "forcefeedback ", parameter.getForceFeedback(), "torquefeedback ", parameter.getTorqueFeedback()
+            time.sleep(0.03)
+
+    def decisionMaking(self):
+        while True:
+
+            self.globalDecisionMade = 1
+            time.sleep(0.01)
+        #return ret
+
+    def decision_made(self):
+        ret = self.decision_made
+        return ret
+
+    def storingData(self):
+        while True:
+            data = list()
+            self.storingDataLock.acquire()
+            if len(self.sensingParameterSequence) >= 100:
+                data = self.sensingParameterSequence[0:100]
+                del self.sensingParameterSequence[0:100]
+            self.storingDataLock.release() 
+            path = "./hapticData/hapticFeedback.csv"
+            for var in data:
+                tmpData = list()
+                tmpData.append(str(var.getTimestamps()))
+                tmpData.append(str(var.getForceFeedback()))
+                tmpData.append(str(var.getTorqueFeedback()))
+                tmpData.append(str(var.getDistanceFromChuckToCatheter()))
+                tmpData.append(str(var.getTelescopicRodLength()))
+                tmpData.append(str(var.getDistanceFromCatheterToGuidewire()))
+                tmpData.append(str(var.getGuidewireAngle()))
+                tmpData.append(str(var.getTranslationVelocity()))
+                tmpData.append(str(var.getRotationVelocity()))
+               # for x in tmpData:
+                #    print x
+                with open(path, 'a+') as f:
+                    csv_writer = csv.writer(f)
+                    csv_writer.writerow(tmpData)
+                    #f.write(tmpData[0])
+
+            time.sleep(1)
+
     def clear_guidewire_message(self):
         self.guidewireProgressInstructionSequence = []
 
@@ -97,29 +177,80 @@ class RCPContext:
     def set_contrast_media_control_state(self, contrast_media_control_state):
         self.contrastMediaControlState = contrast_media_control_state
 
-    def get_global_guidewire_distance(self):
-        return self.globalGuidewireDistance
+    def getGlobalForceFeedback(self):
+        return self.globalForceFeedback
 
-    def set_global_guidewire_distance(self, guidewire_diatance):
-        self.globalGuidewireDiatnce = guidewire_distance
+    def setGlobalForceFeedback(self, globalForceFeedback):
+        self.globalForceFeedback = globalForceFeedback
 
-    def get_global_guidewire_angle(self):
+    def getGlobalTorqueFeedback(self):
+        return self.globalTorqueFeedback
+
+    def setGlobalTorqueFeedback(self, globalTorqueFeedback):
+        self.globalTorqueFeedback = globalTorqueFeedback
+
+    def getGlobalDistanceFromChuckToCatheter(self):
+        return self.globalDistanceFromChuckToCatheter
+
+    def setGlobalDistanceFromChuckToCatheter(self, globalDistanceFromChuckToCatheter):
+        self.globalDistanceFromChuckToCatheter = globalDistanceFromChuckToCatheter
+
+    def getGlobalTelescopicRodLength(self):
+        return self.globalTelescopicRodLength
+
+    def setGlobalTelescopicRodLength(self, globalTelescopicRodLength):
+        self.globalTelescopicRodLength = globalTelescopicRodLength
+
+    def getGlobalDistanceFromCatheterToGuidewire(self):
+        return self.globalDistanceFromCatheterToGuidewire
+
+    def setGlobalDistanceFromCatheterToGuidewire(self, globalDistanceFromCatheterToGuidewire):
+        self.globalDistanceFromCatheterToGuidewire = globalDistanceFromCatheterToGuidewire
+
+    def getGlobalGuidewireAngle(self):
         return self.globalGuidewireAngle
 
-    def set_global_guidewire_angle(self, guidewire_angle):
-        self.globalGuidewireAngle = guidewire_distance
+    def setGlobalGuidewireAngle(self, globalGuidewireAngle):
+        self.globalGuidewireAngle = globalGuidewireAngle
 
-    def get_global_catheter_distance(self):
-        return self.globalCatheterdistance
+    def getGlobalTranslationVelocity(self):
+        return globalTranslationVelocity
 
-    def set_global_cather_distance(self, catheter_distance):
-        self.globalGuidewireDistance = catheter_distance
+    def setGlobalTranslationVelocity(self, globalTranslationVelocity):
+        self.globalTranslationVelocity = globalTranslationVelocity
 
-    def get_global_contrastmedia_volumn(self):
-        return self.globalContrastMediaVolumn
+    def getGlobalRotationVelocity(self):
+        return self.globalRotationVelocity
 
-    def set_global_contrastmedia_volumn(self, contrast_media_volumn):
-        self.contrast_media_volumn = contrast_media_volumn
+    def setGlobalRotationVelocity(self, globalRotationVelocity):
+        self.globalRotationVelocity = globalRotationVelocity
+
+    def setGlobalRotationVelocity(self, globalRotationVelocity):
+        self.globalRotationVelocity = globalRotationVelocity
+
+    def getGlobalDecisionMade(self):
+        ret = self.globalDecisionMade
+        return ret
+
+    def setGlobalParameter(self, ID, parameter):
+        if ID is GlobalParameterType.FORCEFEEDBACK:
+            self.setGlobalForceFeedback(parameter)
+        elif ID is GlobalParameterType.TORQUEFEEDBACK:
+            self.setGlobalTorqueFeedback(parameter)
+        elif ID is GlobalParameterType.DISTANCEFROMCHUCKTOCATHETER:
+            self.setGlobalDistanceFromChuckToCatheter(parameter)
+        elif ID is GlobalParameterType.TELESCOPICRODLENGTH:
+            self.setGlobalTelescopicRodLength(parameter)
+        elif ID is GlobalParameterType.DISTANCEFROMCATHETERTOGUIDEWIRE:
+            self.setGlobalDistanceFromCatheterToGuidewire(parameter)
+        elif ID is GlobalParameterType.GUIDEWIREANGLE:
+            self.setGlobalGuidewireAngle(parameter)
+        elif ID is TRANSLATIONVELOCITY:
+            self.setGlobalTranslationVelocity(parameter)
+        elif ID is GlobalParameterType.ROTATIONVELOCITY:
+            self.setGlobalRotationVelocity(parameter)
+        else:
+            print("ParameterType error")
 
     def append_close_session_msg(self, close_session_msg):
 	self.closeSessionSequence.append(close_session_msg)

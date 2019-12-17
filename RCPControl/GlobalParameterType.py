@@ -1,0 +1,14 @@
+#! /usr/bin/env python
+# encoding: utf-8
+
+from enum import Enum
+
+class GlobalParameterType(Enum):
+    FORCEFEEDBACK = 1
+    TORQUEFEEDBACK = 2
+    DISTANCEFROMCHUCKTOCATHETER = 3
+    TELESCOPICRODLENGTH = 4
+    DISTANCEFROMCATHETERTOGUIDEWIRE = 5
+    GUIDEWIREANGLE = 6
+    TRANSLATIONVELOCITY = 7
+    ROTATIONVELOCITY = 8

@@ -6,7 +6,7 @@ import struct
 import mmap
 import threading
 import time
-from RCPDatagram import RCPDatagram
+from RCPCom.RCPDatagram import RCPDatagram
 
 
 class Client:
@@ -28,7 +28,7 @@ class Client:
         self.pos_count = 0
         self.fileSize = 1560 * 1440 * 2
         self.cpt = 0
-	self.datagram_count = 0        
+        self.datagram_count = 0 
         self.receptionTask = threading.Thread(None, self.reception)
 
     def recvall(self, sock, count):

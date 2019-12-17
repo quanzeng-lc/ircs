@@ -1,10 +1,10 @@
 import io
 import socket
 import threading
-from IncomingClient import Client
+from RCPCom.IncomingClient import Client
 import os
 import threading as td
-from RCPInputQueue import InputQueue
+from RCPCom.RCPInputQueue import InputQueue
 
 
 class TcpServer:
@@ -25,15 +25,15 @@ class TcpServer:
         self.listeningTask.start()
 
     def terminate_server(self):
-	print "socket server close"
+        print("socket server close")
         self.flag = False
         self.server_socket.close()
 
     def listening(self):
         while self.flag:
-            print 'waiting for the client:', self.userNum
+            print('waiting for the client:', self.userNum)
             connection, address = self.server_socket.accept()
-            print 'incoming connection...', address
+            print('incoming connection...', address)
 
             input_queue = InputQueue()
             self.inputQueueManager.add_rcp_input_queue(input_queue)

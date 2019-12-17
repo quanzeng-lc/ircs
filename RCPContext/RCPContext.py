@@ -20,18 +20,18 @@ class RCPContext:
         # message sequences
         # ---------------------------------------------------------------------------------------------
 	# catheter control commandes in speed mode
-	self.catheterMoveInstructionSequence = []
+        self.catheterMoveInstructionSequence = []
 	
 	# guidewire control commandes in speed mode
         self.guidewireProgressInstructionSequence = []
         self.guidewireRotateInstructionSequence = []
 
 	# guidewire control commandes in position mode
-	self.guidewireMovingDistance = []
+        self.guidewireMovingDistance = []
 
 	# to be verified...
         self.contrastMediaPushInstructionSequence = []
-	self.injectionCommandSequence = []
+        self.injectionCommandSequence = []
         self.retractInstructionSequence = []
   
         # forcefeedback
@@ -41,7 +41,7 @@ class RCPContext:
         self.catheter_guidewire_push_sequence = []
 
 	# system control
-	self.closeSessionSequence = []
+        self.closeSessionSequence = []
         
 
         self.sensingParameterSequence = []
@@ -49,7 +49,7 @@ class RCPContext:
 	# ---------------------------------------------------------------------------------------------
         # system status variable 
         # ---------------------------------------------------------------------------------------------
-	self.systemStatus = True
+        self.systemStatus = True
         
         # ------------------------------------------------------------------------------------------------------------
         # control variables:
@@ -253,7 +253,7 @@ class RCPContext:
             print("ParameterType error")
 
     def append_close_session_msg(self, close_session_msg):
-	self.closeSessionSequence.append(close_session_msg)
+        self.closeSessionSequence.append(close_session_msg)
     
     def fetch_close_session_msg(self):
         self.inputLock.acquire()
@@ -287,21 +287,20 @@ class RCPContext:
         return length
 
     def close_system(self):
-	self.systemStatus = False
-	
-	self.catheterMoveInstructionSequence = []
+        self.systemStatus = False
+        self.catheterMoveInstructionSequence = []
         self.guidewireProgressInstructionSequence = []
         self.guidewireRotateInstructionSequence = []
         self.contrastMediaPushInstructionSequence = []
         self.retractInstructionSequence = []
         self.guidewireMovingDistance = []
-	self.closeSessionSequence = []
+        self.closeSessionSequence = []
 
     def open_system(self):
-	self.systemStatus = True
+        self.systemStatus = True
 
     def get_system_status(self):
-	return self.systemStatus
+        return self.systemStatus
 
     def clear(self):
         self.catheterMoveInstructionSequence = []
@@ -313,10 +312,10 @@ class RCPContext:
         self.closeSessionSequence = []
 
     def set_distance(self, dis):
-	self.guidewireMovingDistance.append(dis)
+        self.guidewireMovingDistance.append(dis)
 
     def fetch_latest_guidewire_moving_distance(self):
-	self.outputLock.acquire()
+        self.outputLock.acquire()
         length = len(self.guidewireMovingDistance)
         ret = self.guidewireMovingDistance[length-1]
         self.outputLock.release()
@@ -330,7 +329,7 @@ class RCPContext:
         return ret
 
     def get_latest_guidewire_moving_distance_sequence_length(self):
-	self.outputLock.acquire()
+        self.outputLock.acquire()
         length = len(self.guidewireMovingDistance)
         self.outputLock.release()
         return length   

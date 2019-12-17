@@ -28,15 +28,14 @@ class RCPComStack():
         self.clientList.append(client)
 
     def launch_transmission_task_by_addr(self, addr):
-        
-	for client in self.clientList:
+        for client in self.clientList:
 	    # print addr, client.get_addr()
             if client.get_addr() == addr:
                 client.launch()
 
     def close_session(self):
-	self.context.close_system()
-	self.serv.terminate_server()
-	self.decodingTask.stop()
-	self.encodingTask.stop()
-	sys.exit(0)
+        self.context.close_system()
+        self.serv.terminate_server()
+        self.decodingTask.stop()
+        self.encodingTask.stop()
+        sys.exit(0)

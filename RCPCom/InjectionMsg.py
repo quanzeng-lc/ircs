@@ -1,12 +1,11 @@
-import RCPDatagram
+import RCPCom.RCPDatagram
 
 
 class InjectionMsg:
     def __init__(self, msg):
         # header 10 byte
         self.volume = 0.0
-	self.speed = 0.0
-
+        self.speed = 0.0
         self.transform_datagram_into_injection_msg(msg)
 
     def get_volume(self):
@@ -25,5 +24,5 @@ class InjectionMsg:
         datagram_body = datagram.get_itc_datagram_body()
         v =ord(datagram_body[0]) + ord(datagram_body[1])*256
         s = ord(datagram_body[2]) + ord(datagram_body[3])*256
-	self.volume = v/100 + v%100*0.01
-	self.speed = s/100 + s%100*0.01
+        self.volume = v/100 + v%100*0.01
+        self.speed = s/100 + s%100*0.01

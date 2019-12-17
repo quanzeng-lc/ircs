@@ -5,20 +5,19 @@ import RPi.GPIO as GPIO
 import time
 import threading
 import random
-from EmergencySwitch import EmergencySwitch
+from RCPControl.EmergencySwitch import EmergencySwitch
 
 
 class InfraredReflectiveSensor(object):
     def __init__(self):
         self.doutBack = 2
-	self.doutFront = 3
-    	self.flag = True
+        self.doutFront = 3
+        self.flag = True
         self.status = 0
-	GPIO.setmode(GPIO.BCM)
-	GPIO.setwarnings(False)
-
-	GPIO.setup(self.doutBack, GPIO.IN)
-	GPIO.setup(self.doutFront, GPIO.IN)
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setwarnings(False)
+        GPIO.setup(self.doutBack, GPIO.IN)
+        GPIO.setup(self.doutFront, GPIO.IN)
 
         self.switch = EmergencySwitch()
         self.stateTask = threading.Thread(None, self.infraredReflectiveStatus)
@@ -56,8 +55,8 @@ class InfraredReflectiveSensor(object):
     def read(self):
         cpt = 0
         while self.flag:
-    	    status = self.read_current_state()
-            print status
+            status = self.read_current_state()
+            print(status)
        	    time.sleep(0.05)
 """
 irs = InfraredReflectiveSensor()

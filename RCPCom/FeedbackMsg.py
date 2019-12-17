@@ -1,4 +1,4 @@
-import RCPDatagram
+import RCPCom.RCPDatagram
 
 class FeedbackMsg:
     def __init__(self):

@@ -8,12 +8,12 @@ class RCPDecodingTask:
         self.inputQueueManager = input_queue_manager
         self.context = _context
         self.datagramAnalyser = _datagram_analyser
-	self.flag = True
+        self.flag = True
         self.receptionTask = threading.Thread(None, self.decodage)
         self.receptionTask.start()
     
     def stop(self):
-	self.flag = False
+        self.flag = False
 
     def decodage(self):
         while self.flag:

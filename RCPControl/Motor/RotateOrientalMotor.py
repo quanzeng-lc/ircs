@@ -21,7 +21,7 @@ class RotateOrientalMotor(object):
         GPIO.setup(self.pushIO, GPIO.OUT, initial=GPIO.HIGH)
         GPIO.setup(self.pullIO, GPIO.OUT, initial=GPIO.HIGH)
         self.flag = True
-	self.pos_flag = True
+        self.pos_flag = True
         self.expectedSpeedFlag = 0
         # count the pulse to calculate the rotating speed deg/s
         self.count = 0
@@ -31,8 +31,8 @@ class RotateOrientalMotor(object):
         self.hapticFeedbackID = 0
 
 	#mode choose
-	self.mode = True
-        self.max_interval = 9999
+        self.mode = True
+        self.max_interval = 0
 
         #parameter resolution: degree/pulse
         self.deg_pulse = 0.36
@@ -51,13 +51,13 @@ class RotateOrientalMotor(object):
         self.rotate_angle = 0
         self.pos_expectedSpeed = 60.0
 	
-	self.pos_count = 0
+        self.pos_count = 0
 #	self.all_sleep_time = 0
         
         self.mv_enable = True
 
-	if self.mode:
-	    self.moveTask = threading.Thread(None, self.continuous_move)
+        if self.mode:
+            self.moveTask = threading.Thread(None, self.continuous_move)
             self.moveTask.start()
 #	else:
 #	    self.moveTask = threading.Thread(None, self.continuous_move_position)
@@ -72,10 +72,10 @@ class RotateOrientalMotor(object):
         self.flag = True
 
     def close_device(self):
-	self.flag = False
+        self.flag = False
 
     def close_position_device(self):
-	self.pos_flag = False
+        self.pos_flag = False
 
     def set_expectedSpeed(self, speed):
         if speed > 0:
@@ -85,8 +85,7 @@ class RotateOrientalMotor(object):
             self.expectedSpeedFlag = 2
             self.vel_mode_interval = abs(self.deg_pulse/(self.gear_ratio*speed*2.0))
         elif speed == 0:
-	    self.expectedSpeedFlag = 0
-            self.vel_mode_interval = self.max_interval
+            self.expectedSpeedFlag = 0
         self.expectedSpeed = abs(speed)
    
     def standby(self):
@@ -103,7 +102,7 @@ class RotateOrientalMotor(object):
         while self.flag:            
             if self.mv_enable:
                 if self.expectedSpeedFlag == 0:
-		    time.sleep(0.1)
+                    time.sleep(0.1)
 
                 if self.expectedSpeedFlag == 1:
                     self.push()
@@ -120,16 +119,13 @@ class RotateOrientalMotor(object):
     
     def push(self):
         self.orientalMotorPushLock.acquire()
-	interval = self.max_interval
-	if self.expectedSpeed == 0:
-	    interval = self.max_interval
+        interval = self.max_interval
+        if self.expectedSpeed == 0:
             return 
-	else:
+        else:
             interval = self.vel_mode_interval
             #print "interval:", interval
         self.orientalMotorPushLock.release()
-        if interval > 0.5:
-            return
         GPIO.output(self.pushIO, False)              
         time.sleep(interval)                
         GPIO.output(self.pushIO, True)
@@ -139,14 +135,11 @@ class RotateOrientalMotor(object):
     def pull(self):
         self.orientalMotorPushLock.acquire()
         interval = self.max_interval
-	if self.expectedSpeed == 0:
-            interval = self.max_interval
+        if self.expectedSpeed == 0:
             return 
         else:
             interval = self.vel_mode_interval
         self.orientalMotorPushLock.release()
-        if interval > 0.5:
-            return
         GPIO.output(self.pullIO, False)
         time.sleep(interval)
         GPIO.output(self.pullIO, True)
@@ -168,33 +161,33 @@ class RotateOrientalMotor(object):
         while self.pos_flag:                     
             if self.rotate_angle > 0:                   
                 self.rotate_angle_push()
-		time.sleep(self.get_position_sleep_time())
+                time.sleep(self.get_position_sleep_time())
 #		self.pos_flag = False
             elif self.rotate_angle < 0:
                 self.rotate_angle_pull()
-		time.sleep(self.get_position_sleep_time())
-	    elif self.rotate_angle == 0:
-		time.sleep(0.001)
+                time.sleep(self.get_position_sleep_time())
+            elif self.rotate_angle == 0:
+                time.sleep(0.001)
 #		self.pos_flag = False
     
 
     def stop(self):
-	self.set_position(0)
+        self.set_position(0)
         self.set_expectedSpeed(0)
-	self.set_pos_expectedSpeed(0)
-	time.sleep(0.01)
-	self.pos_count = 0
+        self.set_pos_expectedSpeed(0)
+        time.sleep(0.01)
+        self.pos_count = 0
     
     def position_push(self):
 #	self.orientalMotorPositionPushLock.acquire()
 #	print self.pos_motor_flag
-        interval = self.max_interval
+        interval = 0
         if self.rotate_angle == 0 or self.pos_expectedSpeed == 0:
             pulse_number = 0
-	    interval = 0
-	else:
+            interval = 0
+        else:
             pulse_number = int(self.gear_ratio*self.rotate_angle/self.deg_pulse)
-	    interval = self.deg_pulse/(self.gear_ratio*self.pos_expectedSpeed*2.0)
+            interval = self.deg_pulse/(self.gear_ratio*self.pos_expectedSpeed*2.0)
 #	print pulse_number
 #	print interval
         for i in range(0, pulse_number): 
@@ -206,15 +199,15 @@ class RotateOrientalMotor(object):
 
             
     def position_pull(self):
-	self.orientalMotorPositionPullLock.acquire()
+        self.orientalMotorPositionPullLock.acquire()
         interval = self.max_interval
-	if self.rotate_angle == 0 or self.pos_expectedSpeed == 0:
+        if self.rotate_angle == 0 or self.pos_expectedSpeed == 0:
             pulse_number = 0
             interval = self.max_interval
         else:
             pulse_number = int(self.gear_ratio*self.rotate_angle/self.deg_pulse)
             interval = self.deg_pulse/(self.gear_ratio*self.pos_expectedSpeed*2.0)
-	self.orientalMotorPositionPullLock.release()
+        self.orientalMotorPositionPullLock.release()
 #	print pulse_number
         for i in range(0, pulse_number):
             GPIO.output(self.pullIO, False)              

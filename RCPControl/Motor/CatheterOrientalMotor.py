@@ -4,7 +4,7 @@
 import RPi.GPIO as GPIO
 import time
 import threading
-from AdvanceMotor import AdvanceMotor
+from RCPControl.Motor.AdvanceMotor import AdvanceMotor
 from RCPContext.RCPContext import RCPContext
 
 # max velocity 10 mm/s
@@ -28,7 +28,7 @@ class CatheterOrientalMotor(AdvanceMotor):
         self.hapticFeedbackID = 0
 
 	#mode choose
-	self.mode = True
+        self.mode = True
 
         #velocity mode
         self.expectedSpeed = 0   # mm/s
@@ -44,7 +44,7 @@ class CatheterOrientalMotor(AdvanceMotor):
 
         #position mode
         self.pos_motor_flag = 1
-	self.pos_flag = True
+        self.pos_flag = True
         self.position = 0
         self.pos_mode_expectedSpeed = 0    # mm/s
         self.pos_mode_expeected_flag = 0
@@ -54,13 +54,13 @@ class CatheterOrientalMotor(AdvanceMotor):
         self.actualVelocity = 0
 
         # count the pulse to calculate the vilocity
-	self.pos_count = 0
+        self.pos_count = 0
 
         # enable
-        self.mv_enable = False
+        self.mv_enable = True
 
-	if self.mode:
-	    self.moveTask = threading.Thread(None, self.continuous_move)
+        if self.mode:
+            self.moveTask = threading.Thread(None, self.continuous_move)
             self.moveTask.start()
 #	else:
 #	    self.moveTask = threading.Thread(None, self.continuous_move_position)
@@ -75,10 +75,10 @@ class CatheterOrientalMotor(AdvanceMotor):
         self.flag = True
 
     def close_device(self):
-	self.flag = False
+        self.flag = False
 
     def close_position_device(self):
-	self.pos_flag = False
+        self.pos_flag = False
 
     def set_expectedSpeed(self, speed):
         if speed > 0:
@@ -88,8 +88,7 @@ class CatheterOrientalMotor(AdvanceMotor):
             self.expectedSpeedFlag = 2
             self.interval = abs((self.roller_diameter*self.pi_efficient*self.deg_pulse) / (speed*180*2.0*2.0))
         elif speed == 0:
-	    self.expectedSpeedFlag = 0
-            self.interval = 9999
+            self.expectedSpeedFlag = 0
         self.expectedSpeed = abs(speed)
    
     def standby(self):
@@ -106,7 +105,7 @@ class CatheterOrientalMotor(AdvanceMotor):
         while self.flag:            
             if self.mv_enable:
                 if self.expectedSpeedFlag == 0:
-		    time.sleep(0.1)
+                    time.sleep(0.1)
 
                 if self.expectedSpeedFlag == 1:
                     self.push()
@@ -123,11 +122,10 @@ class CatheterOrientalMotor(AdvanceMotor):
     
     def push(self):
         self.orientalMotorPushLock.acquire()
-	interval = 999999
-	if self.expectedSpeed == 0:
-	    interval = 999999
+        interval = 0
+        if self.expectedSpeed == 0:
             return 
-	else:
+        else:
             interval = self.interval
             #print "interval:", interval
         GPIO.output(self.pushIO, False)              
@@ -139,9 +137,8 @@ class CatheterOrientalMotor(AdvanceMotor):
 
     def pull(self):
         self.orientalMotorPullLock.acquire()
-        interval = 999999
-	if self.expectedSpeed == 0:
-            interval = 999999
+        interval = 0
+        if self.expectedSpeed == 0:
             return 
         else:
             interval = self.interval
@@ -176,22 +173,22 @@ class CatheterOrientalMotor(AdvanceMotor):
         while self.pos_flag:                     
             if self.position > 0:                   
                 self.position_push()
-		time.sleep(self.get_position_sleep_time())
+                time.sleep(self.get_position_sleep_time())
 #		self.pos_flag = False
             elif self.position < 0:
                 self.position_pull()
-		time.sleep(self.get_position_sleep_time())
-	    elif self.position == 0:
-		time.sleep(0.001)
+                time.sleep(self.get_position_sleep_time())
+            elif self.position == 0:
+                time.sleep(0.001)
 #		self.pos_flag = False
 
        
     def stop(self):
         self.set_expectedSpeed(0)
-	self.set_position(0)
-	self.set_pos_mode_expectedSpeed(0)
-	time.sleep(0.01)
-	self.pos_count = 0
+        self.set_position(0)
+        self.set_pos_mode_expectedSpeed(0)
+        time.sleep(0.01)
+        self.pos_count = 0
 
     def position_move(self):
         if self.pos_mod_expected_flag == 1:
@@ -205,15 +202,15 @@ class CatheterOrientalMotor(AdvanceMotor):
     def position_push(self):
     #	self.orientalMotorPositionPushLock.acquire()
     #	print self.pos_motor_flag
-        interval = 9999
+        interval = 0
         if self.position == 0 or self.pos_mode_expectedSpeed == 0:
             distance = 0
             interval = 0
         else:
             distance = self.distance_pulse
             interval = self.pos_mode_interval
-            print distance
-            print interval
+            print(distance)
+            print(interval)
         for i in range(0, distance): 
             GPIO.output(self.pushIO, False)              
             time.sleep(interval)                
@@ -224,15 +221,15 @@ class CatheterOrientalMotor(AdvanceMotor):
             
     def position_pull(self):
 #	self.orientalMotorPositionPullLock.acquire()
-        interval = 9999
-	if self.position == 0 or self.pos_mode_expectedSpeed == 0:
+        interval = 0
+        if self.position == 0 or self.pos_mode_expectedSpeed == 0:
             distance = 0
             interval = 0
         else:
             distance = self.distance_pulse
             interval = self.pos_mode_interval
-            print distance
-            print interval
+            print(distance)
+            print(interval)
         for i in range(0, distance):
             GPIO.output(self.pullIO, False)              
             time.sleep(interval)             

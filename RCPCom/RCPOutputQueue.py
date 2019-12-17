@@ -3,7 +3,7 @@ import threading
 
 class OutputQueue():
     def __init__(self):
-	self.outputQueueLock = threading.Lock()
+        self.outputQueueLock = threading.Lock()
         self.outputQueue = []
 
     def append(self, datagram):

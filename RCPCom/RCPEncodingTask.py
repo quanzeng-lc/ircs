@@ -6,18 +6,18 @@ import struct
 import mmap
 import threading
 import time
-from RCPDatagram import RCPDatagram 
+from RCPCom.RCPDatagram import RCPDatagram 
 
 class RCPEncodingTask:
     def __init__(self, context, output_queue_manager):
         self.context = context
         self.output_queue_manager = output_queue_manager
-	self.flag = True
+        self.flag = True
         self.encodingThread = threading.Thread(None, self.decodage)
-	self.encodingThread.start()
+        self.encodingThread.start()
 	
     def stop(self):
-	self.flag = False
+        self.flag = False
 
     def decodage(self):
         while self.flag:
@@ -40,6 +40,6 @@ class RCPEncodingTask:
                         datagram.set_time_stamps(12345)
                         datagram.set_dlc(10)
                         datagram.set_itc_datagram_body(datagram_body)
-		        self.output_queue_manager.add_datagram_by_id(cpt, datagram)
+                        self.output_queue_manager.add_datagram_by_id(cpt, datagram)
             time.sleep(0.05)
 
